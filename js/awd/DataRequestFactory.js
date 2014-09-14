@@ -42,7 +42,7 @@ app.factory('DataRequest', function($http) {
     //functions to make the requests
     return {
         dummy: function() {
-            return $http.post(self.mainServerApp,"arg1=value1" + "&arg2=value2")
+            return $http.post("some/url","arg1=value1" + "&arg2=value2")
                     .then(function(result) {
                         return true;//return true and ignore results
                     });
