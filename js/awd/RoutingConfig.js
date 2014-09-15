@@ -19,6 +19,11 @@ app.config(['$routeProvider','$locationProvider', function($routeProvider, $loca
             templateUrl: function(){
                 return "./pages/dashboard.html";
             }
+        }).when('/machine/:machineId',
+        {
+            templateUrl: function(){
+                return "./pages/machine.html";
+            }
         }).otherwise({
             redirectTo: (function() {
                 return function(){

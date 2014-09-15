@@ -1,3 +1,4 @@
+
 /**
  * Defininmg a filter to start traversing arrays at a spcified index
  * @param string filterName The name of the filter

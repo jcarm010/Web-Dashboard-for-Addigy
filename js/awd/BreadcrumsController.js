@@ -9,6 +9,8 @@ app.controller('Breadcrums', ['DataRequest', '$location', function(DataRequest, 
                 return "Login";
             else if(path === "/dashboard")
                 return "Dashboard";
+            else if(path.indexOf("/machine")===0)
+                return "Machine";
         };
         
     }]);
