@@ -1,5 +1,11 @@
 <!-- Dashboard -->
-<div>
-    
+<div ng-controller="MachinesCtrl as machines">
+	
+	<input type="text" ng-model="search.connectorId" />
+
+    <p ng-repeat="machine in machines.machines | filter: search">
+    	{{machine.connectorId + " " + machine.encryption}}
+    </p>
+    <p>{{machines.encryption}}</p>
 </div>
 <!-- /Dashboard -->
