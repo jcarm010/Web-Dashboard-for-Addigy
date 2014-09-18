@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- *
+ * Handles reporting of the collection of data.
  * @author javier
  */
 public class Reporter {
