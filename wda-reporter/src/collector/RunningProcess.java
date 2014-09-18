@@ -2,7 +2,8 @@ package collector;
 
 import java.util.HashMap;
 import java.util.Map;
-import json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A running process on the system and its statistics.
@@ -35,15 +36,27 @@ public class RunningProcess {
         //get and return piece of statistic
         return facts.get(factName);
     }
-    @Override
-    public String toString(){
+    /**
+     * Gets this process as a JSON object;
+     * @return This process as JSON.
+     */
+    public JSONObject toJson(){
         //object to put the statistics in jason format
         JSONObject job = new JSONObject();
         //go through all the statistics
         facts.entrySet().forEach((fact)->{
-            //add to json object
-            job.accumulate(fact.getKey(), fact.getValue());
+            try {
+                //add to json object
+                job.accumulate(fact.getKey(), fact.getValue());
+            } catch (JSONException ex) {
+                ex.printStackTrace(System.err);
+            }
         });
+        return job;
+    }
+    @Override
+    public String toString(){
+        JSONObject job = toJson();
         //return json object as a json string
         return job.toString();
     }
