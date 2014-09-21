@@ -65,7 +65,7 @@ public class PSCollector implements Collector{
                 //index of the header for the current statistic
                 int ind = 0;
                 //while there are statistics and headers left
-                while(lineScan.hasNext() || ind < headers.size()){
+                while(lineScan.hasNext() && ind < headers.size()){
                     String f = lineScan.next();//get one piece of statistic
                     //add statistic to the process under the header name
                     p.addFact(headers.get(ind++), f);
@@ -153,7 +153,7 @@ public class PSCollector implements Collector{
         int seen = 0;//number of processes seen
         //go through list of sorted processes starting at the end until begining
         //or have been through qty processes
-        for(int i = unsorted.size()-1; i>-0 && seen++ < qty;i--)
+        for(int i = unsorted.size()-1; i>=0 && seen++ < qty;i--)
             //add to the list of top qty processes
             sorted.add(unsorted.get(i));
         //return list of top qty processes

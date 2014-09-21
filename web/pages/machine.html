@@ -1,5 +1,6 @@
 <!-- Machine Page -->
 <div ng-controller="MachineCtrl as machine">
+    <div class="container"><h3>ID: {{machine.machineId}}</h3></div>
     <div class="row">
         <div class="col-md-3 col-sm-6 col-xs-6 text-center">
             <div style="display: inline; width: 90px; height: 90px;">
@@ -82,8 +83,8 @@
                         <th>Name</th>
                         <th>CPU</th>
                         <th>Memory</th>
-                        <th>Network Down</th>
-                        <th>Network Up</th>
+                        <th>Priority</th>
+                        <th>Nice</th>
                     </tr>
                     <tr ng-repeat="process in machine.processes">
                         <td>{{process.id}}</td>
@@ -92,8 +93,8 @@
                                 {{process.cpu+"%"}}
                         </span></td>
                         <td><span class="badge bg-{{process.memory>80?'red':process.memory>60?'yellow':'green'}}">{{process.memory+"%"}}</span></td>
-                        <td><span class="badge bg-{{process.networkDown>80?'red':process.networkDown>60?'yellow':'green'}}">{{process.networkDown+"%"}}</span></td>
-                        <td><span class="badge bg-{{process.networkUp>80?'red':process.networkUp>60?'yellow':'green'}}">{{process.networkUp+"%"}}</span></td>
+                        <td><span class="badge bg-blue">{{process.priority}}</span></td>
+                        <td><span class="badge bg-blue">{{process.nice}}</span></td>
                     </tr>
                 </tbody></table>
             </div><!-- /.box-body -->

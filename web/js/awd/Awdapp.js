@@ -1,5 +1,5 @@
 //Initialize the panthertext front end app
-var app = angular.module("awdapp", ['ngRoute']);
+var app = angular.module("awdapp", ['pubnub.angular.service','ngRoute']);
 app.user = new User();
 function User(){
     var self = this;

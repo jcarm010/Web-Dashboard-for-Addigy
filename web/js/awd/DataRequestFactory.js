@@ -43,15 +43,12 @@ app.factory('DataRequest', function($http) {
     return {
         dummy: function() {
             return $http.post("some/url","arg1=value1" + "&arg2=value2")
-                    .then(function(result) {
-                        return true;//return true and ignore results
-                    });
+                .then(function(result) {
+                    return true;//return true and ignore results
+                });
         },
-        dummy1: function() {
-            return $http.post(self.mainServerApp,"arg1=value1" + "&arg2=value2")
-                    .then(function(result) {
-                        return true;//return true and ignore results
-                    });
+        getPubnubKeys: function() {
+            return self.makeRequest("./resources/pubnub-keys.php","");//resources/pubnub-keys.php
         }
     };
 });

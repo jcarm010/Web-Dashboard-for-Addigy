@@ -17,7 +17,7 @@ import publish.PublisherFactory;
 public class Reporter {
     //indicates whether to continue running
     private static boolean running = true;
-    private static final int intervalTime = 5000;
+    private static final int intervalTime = 10000;
     //path to settings file
     public static final String settingsDir = System.getProperty("user.home")+
             File.separator+".wda-settings";
@@ -43,7 +43,8 @@ public class Reporter {
         while(running){
             List<RunningProcess> topMem = collector.getTopByMemory(10);
             JSONObject obj = new JSONObject();
-
+            accumulateJson(obj,"msgType","statistics");
+            accumulateJson(obj, "timeStamp", System.currentTimeMillis());
             topMem.forEach(p -> {
                 try{
                     obj.append("processes", p.toJson());
@@ -57,6 +58,14 @@ public class Reporter {
             }catch(InterruptedException err){
                 err.printStackTrace(System.err);
             }
+        }
+    }
+    
+    private static void accumulateJson(JSONObject obj,String key, Object value){
+        try{
+            obj.accumulate(key, value);
+        }catch(JSONException err){
+            err.printStackTrace(System.err);
         }
     }
     /**

@@ -1,8 +1,8 @@
 /*
  * This controller handles functionality related to the single machine page
  */
-app.controller('MachineCtrl', ['DataRequest', '$location', '$routeParams', '$interval',
-    function(DataRequest, $location, $routeParams, $interval) {
+app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routeParams', '$interval','$rootScope',
+    function(PubNub, DataRequest, $location, $routeParams, $interval,$rootScope) {
         var self = this;
         this.user = app.user;//user specific info as defined in awdapp.js
         this.user.username = "javier";
@@ -36,30 +36,43 @@ app.controller('MachineCtrl', ['DataRequest', '$location', '$routeParams', '$int
             }
         };
         this.processes = [
-//            {id:3445, name:'Process 1', cpu:20, memory:20, networkDown: 15, networkUp: 5},
-//            {id:3446, name:'Process 2', cpu:20, memory:20, networkDown: 15, networkUp: 5},
-//            {id:3447, name:'Process 3', cpu:20, memory:20, networkDown: 15, networkUp: 5}
+//            {id:3445, name:'Process 1', cpu:20, memory:20, priority: 15, nice: 5}
         ];
+        DataRequest.getPubnubKeys().then(function(data){
+            var keys = data;
+            PubNub.init(keys);
+            var theChannel = self.machineId;
+            PubNub.ngSubscribe({ channel: theChannel });    
+            $rootScope.$on(PubNub.ngMsgEv(theChannel), onMessage);
+        });
+        
+        function onMessage (event, payload) {
+            // payload contains message, channel, env...
+            console.log("Message: ");
+            console.log(payload);
+            var msg = payload.message;
+            var type = msg.msgType;
+            if(type !== 'statistics' || msg.timeStamp < self.processes.timeStamp) return;
+            console.log("Updating processes");
+            var processes = msg.processes;   
+            processes.timeStamp = msg.timeStamp;
+            for(var i = 0 ; i < processes.length ; i++){
+                var proc = processes[i];
+                proc.id = proc.PID;
+                proc.name = proc.COMM;
+                proc.cpu = proc.CPU;
+                proc.memory = proc.MEM;
+                proc.priority = proc.PRI;
+                proc.nice = proc.NI;
+            }
+            self.processes = processes;
+        }
+        
+        
         var pcount = 2000;
         $interval(setDummyData,1500);
         function setDummyData(){
-            var toMod = getRandomArbitrary(0,10);
-            if(toMod%2){
-                for(var i = 0 ; i < toMod;i++)
-                    self.processes.push({
-                        id:pcount,
-                        name:'Process '+pcount++,
-                        cpu: getRandomArbitrary(0,100),
-                        memory: getRandomArbitrary(0,100),
-                        networkDown: getRandomArbitrary(0,100),
-                        networkUp: getRandomArbitrary(0,100)
-                    });
-            }else{
-                while(self.processes.length+2 > 0 && toMod-->0){
-                    self.processes.splice(getRandomArbitrary(0,self.processes.length),1);
-                }
-            }
-
+            
             self.memory.usedMemory = parseInt(getRandomArbitrary(500,self.memory.totalMemory));
             $("#memory-usage-knob").trigger(
                 'configure',{
