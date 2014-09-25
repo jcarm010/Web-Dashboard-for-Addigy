@@ -19,7 +19,8 @@ public interface Collector {
         MEM,//memory usage as percentage
         PRI,//priority of a process
         NI,//nice value of a process
-        COMM//command used to execute a process
+        COMM,//command used to execute a process
+        USER_NAME,//the name of the user that this process belongs to
     }
     /**
      * Gets @qty amount of processes that are consuming the most amount of
@@ -30,6 +31,15 @@ public interface Collector {
      *         Null if there was some error.
      */
     public List<RunningProcess> getTopByMemory(int qty);
+    /**
+     * Gets @qty amount of processes that are consuming the most amount of
+     * CPU.
+     * @param qty The quantity of processes to include in the list.
+     * @return The top @qty processes running in the system ranked by CPU
+     *         usage from most CPU in use to least amount of CPU in use.
+     *         Null if there was some error.
+     */
+    public List<RunningProcess> getTopByCPU(int qty);
     /**
      * Collects statistics about all the processes running on the system.
      * @return A list of all running processes without any order. Null if error.

@@ -35,9 +35,8 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 return parseInt(this.used * 100 / this.max);
             }
         };
-        this.processes = [
-//            {id:3445, name:'Process 1', cpu:20, memory:20, priority: 15, nice: 5}
-        ];
+        //todo: toggle processes
+        this.processContainer = new ProcessContainer();
         DataRequest.getPubnubKeys().then(function(data){
             var keys = data;
             PubNub.init(keys);
@@ -48,27 +47,158 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
         
         function onMessage (event, payload) {
             // payload contains message, channel, env...
-            console.log("Message: ");
-            console.log(payload);
+//            console.log("Message: ");
+//            console.log(payload);
             var msg = payload.message;
             var type = msg.msgType;
-            if(type !== 'statistics' || msg.timeStamp < self.processes.timeStamp) return;
-            console.log("Updating processes");
+            if(type === 'statistics' )
+                processStatistics(msg);
+            if(type === 'singleProcess')
+                processSingleProcess(msg);
+        }
+        function processSingleProcess(msg){
+//            console.log('Updating Process: ');
+//            console.log(msg);
+            if(msg.timeStamp < self.processContainer.timeStamp) return;
+            var proc = msg.process;
+            var process = new Process({
+                id:proc.PID,
+                name:proc.COMM,
+                cpu: proc.CPU,
+                memory: proc.MEM,
+                priority: proc.PRI,
+                nice: proc.NI,
+                user: proc.USER_NAME
+            });
+            self.processContainer.insertProcess(process,msg.index,msg.total,msg.timeStamp);
+        }
+        function processStatistics(msg){
+            if(msg.timeStamp < self.processContainer.timeStamp) return;
+            console.log("Updating statistics");
+            self.processContainer.clear();
             var processes = msg.processes;   
             processes.timeStamp = msg.timeStamp;
             for(var i = 0 ; i < processes.length ; i++){
                 var proc = processes[i];
-                proc.id = proc.PID;
-                proc.name = proc.COMM;
-                proc.cpu = proc.CPU;
-                proc.memory = proc.MEM;
-                proc.priority = proc.PRI;
-                proc.nice = proc.NI;
+                var process = new Process({
+                    id:proc.PID,
+                    name:proc.COMM,
+                    cpu: proc.CPU,
+                    memory: proc.MEM,
+                    priority: proc.PRI,
+                    nice: proc.NI,
+                    user: proc.USER_NAME
+                });
+                self.processContainer.addLastProcess(process,msg.timeStamp);
             }
             self.processes = processes;
         }
-        
-        
+        function ProcessContainer(){
+            var container = this;
+            this.allSelected = false;
+            this.timeStamp = 0;
+            this.processes = [
+//                {id:3445, name:'Process 1', cpu:20, memory:20, priority: 15, nice: 5, user: "john", selected: false},
+//                {id:3445, name:'Process 1', cpu:20, memory:20, priority: 15, nice: 5, user: "john", selected: false},
+//                {id:3445, name:'Process 1', cpu:20, memory:20, priority: 15, nice: 5, user: "john", selected: false}
+            ];
+            this.map = {};//map<string,int> - map from id to position in array
+            this.toggleAllProcesses = function(){
+                for(var i = 0 ; i < container.processes.length; i++){
+                    var curr = container.processes[i];
+                    curr.selected = !container.allSelected;
+                }
+            };
+            this.killSelected = function(){
+                console.log("Halting selected");
+                for(var i = 0 ; i < container.processes.length;i++){
+                    var proc = container.processes[i];
+                    console.log(proc);
+                    if(proc.id && !proc.selected) continue;
+                    console.log("Ending pid: "+proc.id);
+                    
+                    PubNub.ngPublish({
+                        channel: self.machineId,
+                        message: {msgType:"killRequest",pid:proc.id}
+                    });
+                    
+                }
+            };
+            this.insertProcess = function(process,index,outOf,timeStamp){
+                if(timeStamp < this.timeStamp) return;
+                this.timeStamp = timeStamp;
+                var position = this.map[process.id];
+                modifyProcessesTo(outOf);
+                if(!position && position!==0){
+                    container.processes[index] = process;
+                    container.map[process.id] = index;
+                }else{
+                    var pInList = container.processes[position];
+                    pInList.update(process);
+                    if(position !== index){
+                        container.processes[position] = new Process(null);
+                        container.processes[index] = pInList;
+                        container.map[pInList.id] = index;
+                    }
+                }
+            };
+            this.addLastProcess = function(process,timeStamp){
+                if(timeStamp < this.timeStamp) return;
+                this.timeStamp = timeStamp;
+                var position = this.map[process.id];
+                if(!position && position!==0){//not in set
+                    this.processes.push(process);
+                    updateMap(this.processes.length-1, this.processes.length-1);
+                }else{
+                    var proc = this.processes[position];
+                    proc.update(process);
+                    this.processes.push(proc);
+                    updateMap(position, this.processes.length-1);
+                }
+            };
+            this.clear = function(){
+                this.processes = [];
+                this.map = {};
+            };
+            function updateMap(from,to){
+                for(var i = from ; i <= to;i++){
+                    var proc = container.processes[i];
+                    container.map[proc.id] = i;
+                }
+            }
+            function modifyProcessesTo(qty){
+                if(qty>=container.processes.length){
+                    while(container.processes.length < qty)
+                        container.processes.push(new Process(null));
+                }else {
+                    while(container.processes.length >= 0 && container.processes.length > qty){
+                        var toRemove = container.processes.length-1;
+                        container.map[toRemove.id] = null;
+                        container.processes.splice(container.processes.length-1,1);
+                    }
+                }
+            }
+        }
+        function Process(init){
+            var self = this;
+            self.update = function(process){
+                self.id = initOpt("id",process);
+                self.name = initOpt("name",process);
+                self.cpu = initOpt("cpu",process);
+                self.memory = initOpt("memory",process);
+                self.priority = initOpt("priority",process);
+                self.nice = initOpt("nice",process);
+                self.user = initOpt("user",process);
+            };
+            self.update(init);
+            self.selected = false;
+            self.setSelected = function(value){
+                self.selected = value;
+            };
+            function initOpt(field, proc){
+                return proc?proc[field]:proc;
+            }
+        }
         var pcount = 2000;
         $interval(setDummyData,1500);
         function setDummyData(){

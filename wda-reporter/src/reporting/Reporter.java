@@ -35,32 +35,56 @@ public class Reporter {
         Publisher pub = PublisherFactory.getPublisher();
         //a collector to collect statistics
         Collector collector = CollectorFactory.getCollector();
-        startBroadcasting(collector,pub);
+//        startBroadcastingStatistics(collector,pub);
+        startBroadcastingSingleProcesses(collector,pub);
         System.exit(0);
     }
-    public static void startBroadcasting(Collector collector, Publisher pub){
-        //run until signaled to stop running
+    public static void startBroadcastingSingleProcesses(Collector collector, Publisher pub){
         while(running){
-            List<RunningProcess> topMem = collector.getTopByMemory(10);
-            JSONObject obj = new JSONObject();
-            accumulateJson(obj,"msgType","statistics");
-            accumulateJson(obj, "timeStamp", System.currentTimeMillis());
-            topMem.forEach(p -> {
-                try{
-                    obj.append("processes", p.toJson());
-                }catch(JSONException err){
-                    err.printStackTrace(System.err);
-                }
-            });
-            pub.broadcastMessage(obj);
-            try{
-                Thread.sleep(intervalTime);
-            }catch(InterruptedException err){
-                err.printStackTrace(System.err);
+            List<RunningProcess> processes = collector.getTopByCPU(20);
+            long timeStamp = System.currentTimeMillis();
+            for(int i = 0 ; i < processes.size() ;i++){
+                JSONObject obj = new JSONObject();
+                accumulateJson(obj, "msgType", "singleProcess");
+                accumulateJson(obj, "sortedBy", Collector.Fact.CPU);
+                accumulateJson(obj, "timeStamp", timeStamp);
+                accumulateJson(obj, "index", i);
+                accumulateJson(obj, "total", processes.size());
+                accumulateJson(obj, "process", processes.get(i).toJson());
+//                System.out.println(obj);
+                pub.broadcastMessage(obj);
             }
+            takeBreak();
         }
     }
-    
+    /**
+     * Starts broadcasting statistics at intervals.
+     * @param collector The object that collects information.
+     * @param pub The object that broadcasts the information.
+     */
+    public static void startBroadcastingStatistics(Collector collector, Publisher pub){
+        //run until signaled to stop running
+        while(running){
+            List<RunningProcess> topMem = collector.getTopByCPU(10);
+            JSONObject obj = new JSONObject();
+            accumulateJson(obj,"sortedBy",Collector.Fact.CPU);
+            accumulateJson(obj,"msgType","statistics");
+            accumulateJson(obj, "timeStamp", System.currentTimeMillis());
+            topMem.forEach(p -> accumulateJson(obj,"processes", p.toJson()));
+//            System.out.println(obj);
+            pub.broadcastMessage(obj);
+            takeBreak();
+        }
+    }
+    private static void takeBreak(){
+        try{
+            System.out.println("*************Taking Break******************");
+            Thread.sleep(intervalTime);
+            System.out.println("*************Back from Break***************");
+        }catch(InterruptedException err){
+            err.printStackTrace(System.err);
+        }
+    }
     private static void accumulateJson(JSONObject obj,String key, Object value){
         try{
             obj.accumulate(key, value);

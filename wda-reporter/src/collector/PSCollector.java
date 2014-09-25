@@ -21,6 +21,7 @@ public class PSCollector implements Collector{
     private static final String CPU = "%cpu";
     private static final String MEM = "%mem";
     private static final String COMM = "command";
+    private static final String USER_NAME = "euser";
     /**
      * Finds all running processes from the output stream of a process executing
      * the ps command.
@@ -93,6 +94,7 @@ public class PSCollector implements Collector{
             case CPU : return Collector.Fact.CPU.toString();
             case MEM : return Collector.Fact.MEM.toString();
             case COMM: return Collector.Fact.COMM.toString();
+            case USER_NAME : return Collector.Fact.USER_NAME.toString();
             default : return heading ;
         }
     }
@@ -117,7 +119,7 @@ public class PSCollector implements Collector{
     public List<RunningProcess> getAllProcesses(){
         //the command to be executed in order to get all statistics
         String command;
-        command ="ps -eo pid,ni,pri,pcpu,pmem,comm";
+        command ="ps a -eo pid,ni,pri,pcpu,pmem,comm,euser";
         //the processes to be started using the ps command
         Process proc = startProcess(command);
         if(proc == null) return null;//return null if error starting process
@@ -140,6 +142,38 @@ public class PSCollector implements Collector{
             String valueOne = one.getValue(Collector.Fact.MEM.toString());
             //get second memory value
             String valueTwo = two.getValue(Collector.Fact.MEM.toString());
+            //get value of first as a double
+            Double vOne = Double.parseDouble(valueOne);
+            //get value of second as a double
+            Double vTwo = Double.parseDouble(valueTwo);
+            //negative if first < second, 0 if first = second, 
+            //and positive if first > second
+            return vOne.compareTo(vTwo);
+        });
+        //list of top qty
+        List<RunningProcess> sorted = new ArrayList<>();
+        int seen = 0;//number of processes seen
+        //go through list of sorted processes starting at the end until begining
+        //or have been through qty processes
+        for(int i = unsorted.size()-1; i>=0 && seen++ < qty;i--)
+            //add to the list of top qty processes
+            sorted.add(unsorted.get(i));
+        //return list of top qty processes
+        return sorted;
+    }
+
+    @Override
+    public List<RunningProcess> getTopByCPU(int qty) {
+        //get list of all processes
+        List<RunningProcess> unsorted = getAllProcesses();
+        //return null if error getting all processes
+        if(unsorted == null)return null;
+        //sort the processes by memory
+        Collections.sort(unsorted, (one,two)->{
+            //get first meory value
+            String valueOne = one.getValue(Collector.Fact.CPU.toString());
+            //get second memory value
+            String valueTwo = two.getValue(Collector.Fact.CPU.toString());
             //get value of first as a double
             Double vOne = Double.parseDouble(valueOne);
             //get value of second as a double
