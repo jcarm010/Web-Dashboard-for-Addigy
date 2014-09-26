@@ -7,8 +7,12 @@ import java.io.File;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
-import publish.Publisher;
-import publish.PublisherFactory;
+import comm.Publisher;
+import comm.PublisherFactory;
+import comm.Receiver;
+import comm.ReceiverFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles reporting of the collection of data.
@@ -17,7 +21,8 @@ import publish.PublisherFactory;
 public class Reporter {
     //indicates whether to continue running
     private static boolean running = true;
-    private static final int intervalTime = 10000;
+    private static final int intervalTime = 5000;
+    private static boolean hasListeners = false;
     //path to settings file
     public static final String settingsDir = System.getProperty("user.home")+
             File.separator+".wda-settings";
@@ -33,6 +38,8 @@ public class Reporter {
 //        Settings.printSettings();
         //a publisher to broadcast data
         Publisher pub = PublisherFactory.getPublisher();
+        Receiver rec = ReceiverFactory.getReceiver();
+        rec.whenAdminCheckedIn(time -> hasListeners = true);
         //a collector to collect statistics
         Collector collector = CollectorFactory.getCollector();
 //        startBroadcastingStatistics(collector,pub);
@@ -54,7 +61,11 @@ public class Reporter {
 //                System.out.println(obj);
                 pub.broadcastMessage(obj);
             }
-            takeBreak();
+            hasListeners = false;
+            JSONObject reportRequest = getReportRequest();
+            pub.broadcastMessage(reportRequest);
+            while(!hasListeners)
+                takeBreak();
         }
     }
     /**
@@ -73,8 +84,21 @@ public class Reporter {
             topMem.forEach(p -> accumulateJson(obj,"processes", p.toJson()));
 //            System.out.println(obj);
             pub.broadcastMessage(obj);
-            takeBreak();
+            hasListeners = false;
+            JSONObject reportRequest = getReportRequest();
+            pub.broadcastMessage(reportRequest);
+            while(!hasListeners)
+                takeBreak();
         }
+    }
+    private static JSONObject getReportRequest(){
+        JSONObject obj = new JSONObject();
+        try {
+            obj.accumulate("msgType", "reportRequest");
+        } catch (JSONException ex) {
+            return null;
+        }
+        return obj;
     }
     private static void takeBreak(){
         try{

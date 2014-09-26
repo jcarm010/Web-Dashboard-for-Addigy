@@ -1,12 +1,18 @@
 /*
  * This controller handles functionality related to the single machine page
  */
-app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routeParams', '$interval','$rootScope',
-    function(PubNub, DataRequest, $location, $routeParams, $interval,$rootScope) {
+app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routeParams', '$timeout','$interval','$rootScope',
+    function(PubNub, DataRequest, $location, $routeParams, $timeout ,$interval,$rootScope) {
+        var timeOut = 6000;
         var self = this;
         this.user = app.user;//user specific info as defined in awdapp.js
-        this.user.username = "javier";
-        this.machineId = $routeParams.machineId;
+        this.machineId = $routeParams.machineId;//the machine id
+        this.lastReported = 0;
+        //tells whether the machine is online
+        this.machineOnline = function(){
+            return self.lastReported + timeOut > getCurrentTime();
+        };
+        //an object representing this machine's memory usage
         this.memory = {
             totalMemory: 16000,
             usedMemory: 400,
@@ -14,6 +20,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 return parseInt(this.usedMemory * 100 / this.totalMemory);
             }
         };
+        //an object representing this machine's cpu usage
         this.cpu = {
             used: 2000,
             max: 2600,
@@ -21,6 +28,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 return parseInt(this.used * 100 / this.max);
             }
         };
+        //an object representing this object's network download usage
         this.networkDown = {
             used: 20,
             max: 1000,
@@ -28,6 +36,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 return parseInt(this.used * 100 / this.max);
             }
         };
+        //an object representing this object's network upload usage
         this.networkUp = {
             used: 20,
             max: 1000,
@@ -35,33 +44,59 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 return parseInt(this.used * 100 / this.max);
             }
         };
-        //todo: toggle processes
+        //a container that holds processes running on the machine
         this.processContainer = new ProcessContainer();
+        //get the Pubnub keys and initialize pubnub
         DataRequest.getPubnubKeys().then(function(data){
-            var keys = data;
-            PubNub.init(keys);
-            var theChannel = self.machineId;
-            PubNub.ngSubscribe({ channel: theChannel });    
-            $rootScope.$on(PubNub.ngMsgEv(theChannel), onMessage);
+            var keys = data;//the keys
+            PubNub.init(keys);//initialize with keys
+            var theChannel = self.machineId;//the channel si the machine id
+            PubNub.ngSubscribe({ channel: theChannel });//listen on messages from this channel
+            $rootScope.$on(PubNub.ngMsgEv(theChannel), onMessage);//call onMessage when received a message
+            reportPresence();
         });
-        
+        //handles the event of receiving a message
         function onMessage (event, payload) {
-            // payload contains message, channel, env...
-//            console.log("Message: ");
-//            console.log(payload);
-            var msg = payload.message;
-            var type = msg.msgType;
-            if(type === 'statistics' )
-                processStatistics(msg);
-            if(type === 'singleProcess')
-                processSingleProcess(msg);
+            var msg = payload.message;//get the received message
+            var type = msg.msgType;//get the type of message
+            if(type === 'statistics' ){//when received statistics
+                processStatistics(msg);//processes the statistics received
+            }else if(type === 'singleProcess'){//when received single process data
+                processSingleProcess(msg);//process the single process message
+            }else if(type === 'reportRequest'){//if asked to report presence
+                reportPresence();//report presence
+            }else if(type === 'reportPresence'){//if someone reporting presence
+                processPresenceReport(msg);
+            }
         }
+        function getCurrentTime(){
+            return new Date().getTime();
+        }
+        function processPresenceReport(msg){
+            if(msg.machineId === self.machineId){
+                self.lastReported = currentTime();
+            }
+        }
+        function sendReportRequest(){
+            PubNub.ngPublish({//publish a message asking who is online
+                channel: self.machineId,
+                message: {msgType:"reportRequest"}
+            });
+        }
+        //reports that this client is listening on this channel
+        function reportPresence(){
+            console.log("reporting presence");
+            PubNub.ngPublish({//publish a message sayimg that i am listening
+                channel: self.machineId,
+                message: {msgType:"reportPresence",machineId:"web-listener"}
+            });
+        }
+        //process a single process that has been received
         function processSingleProcess(msg){
-//            console.log('Updating Process: ');
-//            console.log(msg);
-            if(msg.timeStamp < self.processContainer.timeStamp) return;
-            var proc = msg.process;
-            var process = new Process({
+            if(msg.timeStamp < self.processContainer.timeStamp) return;//check for old data
+            self.lastReported = getCurrentTime();//set the current time
+            var proc = msg.process;//get the proess data
+            var process = new Process({//turn into process
                 id:proc.PID,
                 name:proc.COMM,
                 cpu: proc.CPU,
@@ -70,17 +105,18 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 nice: proc.NI,
                 user: proc.USER_NAME
             });
+            //add process where it needs to be
             self.processContainer.insertProcess(process,msg.index,msg.total,msg.timeStamp);
         }
+        //process the statistics sent by the machine
         function processStatistics(msg){
-            if(msg.timeStamp < self.processContainer.timeStamp) return;
-            console.log("Updating statistics");
-            self.processContainer.clear();
+            if(msg.timeStamp < self.processContainer.timeStamp) return;//check that it is not old data
+            self.lastReported = getCurrentTime();//set the time i received this data
+            self.processContainer.clear();//clear the list of processes
             var processes = msg.processes;   
-            processes.timeStamp = msg.timeStamp;
-            for(var i = 0 ; i < processes.length ; i++){
-                var proc = processes[i];
-                var process = new Process({
+            for(var i = 0 ; i < processes.length ; i++){//go through the processes
+                var proc = processes[i];//get one process of the list
+                var process = new Process({//set the process data
                     id:proc.PID,
                     name:proc.COMM,
                     cpu: proc.CPU,
@@ -89,10 +125,15 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                     nice: proc.NI,
                     user: proc.USER_NAME
                 });
+                //add to the current list of processes
                 self.processContainer.addLastProcess(process,msg.timeStamp);
             }
-            self.processes = processes;
         }
+        //chech that machine is online every timeout time
+        $interval(function(){
+            if(!self.machineOnline())
+                sendReportRequest();
+        },timeOut);
         function ProcessContainer(){
             var container = this;
             this.allSelected = false;
@@ -103,40 +144,47 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
 //                {id:3445, name:'Process 1', cpu:20, memory:20, priority: 15, nice: 5, user: "john", selected: false}
             ];
             this.map = {};//map<string,int> - map from id to position in array
-            this.toggleAllProcesses = function(){
+            this.toggleAllProcesses = function(){//toggles all processes to be selected or not selected
+                //got through all processes
                 for(var i = 0 ; i < container.processes.length; i++){
                     var curr = container.processes[i];
-                    curr.selected = !container.allSelected;
+                    curr.selected = !container.allSelected;//toggle it
                 }
             };
+            //sends to kill all the selected processes
             this.killSelected = function(){
-                console.log("Halting selected");
                 for(var i = 0 ; i < container.processes.length;i++){
                     var proc = container.processes[i];
-                    console.log(proc);
-                    if(proc.id && !proc.selected) continue;
-                    console.log("Ending pid: "+proc.id);
-                    
-                    PubNub.ngPublish({
-                        channel: self.machineId,
-                        message: {msgType:"killRequest",pid:proc.id}
-                    });
-                    
+                    if(proc.id && !proc.selected) continue;//if it is selected
+                        PubNub.ngPublish({//send request to kill
+                            channel: self.machineId,
+                            message: {msgType:"killRequest",pid:proc.id}
+                        });
                 }
             };
+            //insert process in the list of processes
             this.insertProcess = function(process,index,outOf,timeStamp){
-                if(timeStamp < this.timeStamp) return;
-                this.timeStamp = timeStamp;
+                if(timeStamp < this.timeStamp) return;//check for old data
+                this.timeStamp = timeStamp;//set the time for this message
+                //get the position of this process if existing
                 var position = this.map[process.id];
+                //modify the list of processes to be of size outOf
                 modifyProcessesTo(outOf);
-                if(!position && position!==0){
+                //if process is not in the list
+                if(!position && position!==0){//put the process at specified index
                     container.processes[index] = process;
                     container.map[process.id] = index;
-                }else{
-                    var pInList = container.processes[position];
-                    pInList.update(process);
+                }else{//if process is already in the list
+                    var pInList;
+                    if(position >= container.processes.length)
+                        pInList = process;
+                    else{
+                        pInList = container.processes[position];
+                        pInList.update(process);
+                    }
                     if(position !== index){
-                        container.processes[position] = new Process(null);
+                        if(position < container.processes.length)
+                            container.processes[position] = new Process(null);
                         container.processes[index] = pInList;
                         container.map[pInList.id] = index;
                     }

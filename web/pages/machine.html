@@ -1,7 +1,10 @@
 <!-- Machine Page -->
 <div ng-controller="MachineCtrl as machine">
-    <div class="container"><h3>ID: {{machine.machineId}}</h3></div>
-    <div class="row">
+    <div class="container">
+        <h3>ID: {{machine.machineId}}</h3>
+        <span class="badge bg-{{machine.machineOnline()?'green':'red'}}">{{machine.machineOnline()?'Online':'Offline'}}</span>
+    </div>
+    <div ng-show="machine.machineOnline()" class="row">
         <div class="col-md-3 col-sm-6 col-xs-6 text-center">
             <div style="display: inline; width: 90px; height: 90px;">
                 <canvas width="90" height="90"></canvas>
@@ -71,7 +74,7 @@
             <div class="knob-label">{{"Network Upload Utilization (Mb/s) - "+machine.networkUp.usedPercent() + "%"}}</div>
         </div>
     </div>
-    <div class="row">
+    <div ng-show="machine.machineOnline()" class="row">
         <div class="box">
             <div class="box-header">
                 <h3 class="box-title">Processes - Top {{machine.processContainer.processes.length}}</h3>
