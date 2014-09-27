@@ -22,8 +22,46 @@ var sampleMachine = {
   wan_ip: "73.46.14.233"
 };
 
+var updates = [
+	"New bug fix available",
+	"New network drivers available",
+	"New security update available",
+	"New printer update available"
+];
+
+function getHealth(num) {
+	switch(num){
+		case 0:
+			return "good";
+		case 1:
+			return "warning";
+		case 2:
+			return "error";
+		default:
+			return "undefined";
+	}
+}
+
+function getAuth(num) {
+	var authentication;
+
+	switch(num){
+		case 0:
+			authentication = "oauth";
+			break;
+		case 1:
+			authentication = "manual";
+			break;
+		case 2:
+			authentication = "remote";
+			break;
+	}
+
+	return authentication;
+}
+
+
 var Machines = (function () {
-	var mach = getDummyMachines();
 
 	function getDummyMachines() {
 		var machines = [];
@@ -32,42 +70,9 @@ var Machines = (function () {
 		for(var i = 0; i < getRandomRange(5, 20); i++){
 			machine = {
 				connectorId: sampleMachine.connectorid + i,
-				health: function() {
-					var type = getRandomRange(0, 2);
-					var health;
-
-					switch(type){
-						case 0:
-							health = "good";
-							break;
-						case 1:
-							health: "warning";
-							break;
-						case 2:
-							health: "error";
-					}
-
-					return health;
-				},
-				encryption: getRandomRange(0,1),
-				authentication: function(){
-					var type = getRandomRange(0, 2);
-					var authentication;
-
-					switch(type){
-						case 0:
-							authentication = "oauth";
-							break;
-						case 1:
-							authentication = "manual";
-							break;
-						case 2:
-							authentication = "remote";
-							break;
-					}
-
-					return authentication;
-				},
+				health: getHealth(getRandomRange(0,3)),
+				encryption: getRandomRange(0,2),
+				authentication: getAuth(getRandomRange(0,3)),
 				uptime: getRandomRange(sampleMachine.uptime, sampleMachine.uptime + 100),
 				hostname: sampleMachine.hostname,
 				sp: {
@@ -92,16 +97,7 @@ var Machines = (function () {
 					longitude: getRandomRange(sampleMachine.location_long - 2, sampleMachine.location_long + 2) 
 				},
 				wanIp: sampleMachine.wan_ip,
-				updates: function() {
-					var updates = [
-						"New bug fix available",
-						"New network drivers available",
-						"New security update available",
-						"New printer update available"
-					];
-
-					return updates[getRandomRange(0,3)];
-				}
+				updates: updates[getRandomRange(0,5)]
 			};
 
 			machines.push(machine);
@@ -110,20 +106,30 @@ var Machines = (function () {
 		return machines;
 	}
 
-	var encrypted = function() { var num; for(var i = 0; i < mach.length; i++) num += mach.encryption; return num };
-	var non_encrypted = (mach.length - encrypted());
-
 	function getRandomRange(min, max) {
         return parseInt(Math.random() * (max - min) + min);
     }
 
 	return {
 		getMachines: function() {
-			return mach;
+			return getDummyMachines();
 		},
-		getEncrypted: function() {
-			return { encrypted: encrypted(), non_encrypted: non_encrypted,
-			percent: (encrypted() / (encrypted() + non_encrypted)) * 100};
+		getEncrypted: function(macs) {
+			var encrypted = 0;
+			var non_encrypted = 0;
+			var percent = 0;
+
+			for(var i = 0; i < macs.length; i++) {
+				console.log(macs[i]);
+				encrypted += macs[i].encryption;
+			}
+
+			non_encrypted = macs.length - encrypted;
+
+			percent = (encrypted / macs.length) * 100;
+
+			return { encrypted: encrypted, non_encrypted: non_encrypted,
+			percent: percent};
 		}
 	}
 })();
@@ -138,5 +144,5 @@ app.controller('MachinesCtrl', ['DataRequest', '$location', '$routeParams', '$in
 		this.user.username = "javier";
 
     	this.machines = Machines.getMachines();
-    	this.encryption = Machines.getEncrypted();
+    	this.encryption = Machines.getEncrypted(this.machines);
  }]);

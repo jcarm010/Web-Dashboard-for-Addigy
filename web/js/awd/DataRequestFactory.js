@@ -49,6 +49,9 @@ app.factory('DataRequest', function($http) {
         },
         getPubnubKeys: function() {
             return self.makeRequest("./resources/pubnub-keys.php","");//resources/pubnub-keys.php
+        },
+        getMachines: function() {
+            return self.makeRequest("./resources/dummyMachines.json", ""); //resources/dummyMachines.json
         }
     };
 });
