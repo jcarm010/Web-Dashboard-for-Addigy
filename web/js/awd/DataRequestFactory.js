@@ -33,12 +33,23 @@ app.factory('DataRequest', function($http) {
      * @param string params String with the parameters
      * @returns The server response as a json object. True if valid, False if invalid, String if error message.
      */
-    self.makeRequest = function(url, params){
+    self.POST = function(url, params){
         return $http.post(url, params)//Make request
             .then(function(result) {//Server response in the result variable
                 return self.parseResponse(result);//parse the response into javascript
             });
     };
+
+    self.GET = function(url) {
+        return $http.get(url);
+
+        /*
+        return $http.get(url)//Make request
+            .then(function(result) {//Server response in the result variable
+                return self.parseResponse(result);//parse the response into javascript
+            });*/
+    }
+
     //functions to make the requests
     return {
         dummy: function() {
@@ -48,10 +59,10 @@ app.factory('DataRequest', function($http) {
                 });
         },
         getPubnubKeys: function() {
-            return self.makeRequest("./resources/pubnub-keys.php","");//resources/pubnub-keys.php
+            return self.GET("./resources/pubnub-keys.php");//resources/pubnub-keys.php
         },
         getMachines: function() {
-            return self.makeRequest("./resources/dummyMachines.json", ""); //resources/dummyMachines.json
+            return self.GET("/resources/dummyMachines.json"); //resources/dummyMachines.json
         }
     };
 });

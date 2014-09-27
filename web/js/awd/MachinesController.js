@@ -137,12 +137,11 @@ var Machines = (function () {
 /*
  * This controller handles functionality related to the multiple machines page
  */
-app.controller('MachinesCtrl', ['DataRequest', '$location', '$routeParams', '$interval',
-    function(DataRequest, $location, $routeParams, $interval) {
+app.controller('MachinesCtrl', ['DataRequest', '$location', '$routeParams', '$interval','$rootScope',
+    function(DataRequest, $location, $routeParams, $interval,$rootScope) {
     	var self = this;
-    	this.user = app.user;	//User info as defined in awdapp.js
-		this.user.username = "javier";
+    	self.user = app.user;	//User info as defined in awdapp.js
+		self.user.username = "javier";
 
-    	this.machines = Machines.getMachines();
-    	this.encryption = Machines.getEncrypted(this.machines);
+		self.machines = DataRequest.getMachines().then(function(res) { self.machines = res.data['@items']; console.log(self.machines) })
  }]);
