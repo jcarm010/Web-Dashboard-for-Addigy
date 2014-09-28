@@ -149,18 +149,21 @@ app.controller('MachinesCtrl', ['MachineService', '$location', '$routeParams', '
 		// the service use a PROMISE in order to fetch the data. The callback is then used inside of the
 		// Service when the data is finally retrieved. (Thanks to JavaScript Asynchronous behavior... -_- )
 		self.machines = MachineService.update(function(machines){ 
-			self.machines = machines; 
+			self.machines = machines;
+			self.machinesBackup = self.machines; 
 			self.uptimes = getUptimes();
 			
 			self.changeUptimes = function() {
-				self.uptimes = [];
+				newMachines = [];
 
-				for(var i = 0; i < self.machines.length; i++) {
-					if(flag == 0 && i%2 == 0) self.uptimes.push(self.machines[i].uptime);
-					else if(flag == 1) self.uptimes.push(self.machines[i].uptime);
+				for(var i = 0; i < self.machinesBackup.length; i++) {
+					if(flag == 0 && i%2 == 0) newMachines.push(self.machinesBackup[i]);
+					else if(flag == 1) newMachines.push(self.machinesBackup[i]);
 				}
 
 				(flag == 0)?flag = 1:flag = 0;
+
+				self.machines = newMachines;
 			}
 
 		});

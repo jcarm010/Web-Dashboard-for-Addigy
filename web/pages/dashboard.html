@@ -2,7 +2,7 @@
 <div ng-controller="MachinesCtrl as machinesctrl">
 	<div class="col-md-8 col-lg-6 col-sm-12">
 		<h3>Machine Uptime</h3>
-		<div wda-bar-chart ng-model="machinesctrl.uptimes" class="bars"></div>
+		<div wda-bar-chart ng-model="machinesctrl.machines" class="bars"></div>
 		<input type="button" ng-click="machinesctrl.changeUptimes()" value="Click to change ng-model for MachinesController (top chart is a directive using JQuery Plugin)">
 	</div>
 
