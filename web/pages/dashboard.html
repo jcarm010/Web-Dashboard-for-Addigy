@@ -1,10 +1,12 @@
 <!-- Dashboard -->
 <div ng-controller="MachinesCtrl as machinesctrl">
-	
-	<input type="text" ng-model="search.connectorid" />
+	<div class="col-md-8 col-lg-6 col-sm-12">
+		<h3>Machine Uptime</h3>
+		<div wda-bar-chart ng-model="machinesctrl.uptimes" class="bars"></div>
+		<input type="button" ng-click="machinesctrl.changeUptimes()" value="Click to change ng-model for MachinesController (top chart is a directive using JQuery Plugin)">
+	</div>
 
-    <p ng-repeat="machine in machinesctrl.machines | filter: search">
-    	{{machine.connectorid}}
-    </p>
+	<input hidden type="text" ng-model="search.connectorid" />
+    <p ng-repeat="machine in machinesctrl.machines | filter: search"></p>
 </div>
 <!-- /Dashboard -->

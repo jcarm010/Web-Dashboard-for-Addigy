@@ -137,11 +137,42 @@ var Machines = (function () {
 /*
  * This controller handles functionality related to the multiple machines page
  */
-app.controller('MachinesCtrl', ['DataRequest', '$location', '$routeParams', '$interval','$rootScope',
-    function(DataRequest, $location, $routeParams, $interval,$rootScope) {
+app.controller('MachinesCtrl', ['MachineService', '$location', '$routeParams', '$interval','$rootScope',
+    function(MachineService, $location, $routeParams, $interval,$rootScope) {
     	var self = this;
     	self.user = app.user;	//User info as defined in awdapp.js
 		self.user.username = "javier";
 
-		self.machines = DataRequest.getMachines().then(function(res) { self.machines = res.data['@items']; console.log(self.machines) })
+		var flag = 0;
+
+		// Gets the machines from the MachineService provider. The call back is needed because the value
+		// the service use a PROMISE in order to fetch the data. The callback is then used inside of the
+		// Service when the data is finally retrieved. (Thanks to JavaScript Asynchronous behavior... -_- )
+		self.machines = MachineService.update(function(machines){ 
+			self.machines = machines; 
+			self.uptimes = getUptimes();
+			
+			self.changeUptimes = function() {
+				self.uptimes = [];
+
+				for(var i = 0; i < self.machines.length; i++) {
+					if(flag == 0 && i%2 == 0) self.uptimes.push(self.machines[i].uptime);
+					else if(flag == 1) self.uptimes.push(self.machines[i].uptime);
+				}
+
+				(flag == 0)?flag = 1:flag = 0;
+			}
+
+		});
+
+		// Gets all of the machine uptimes
+		function getUptimes() {
+			var uptimeList = [];
+
+			for(var i = 0; i < self.machines.length; i++) {
+				uptimeList.push(self.machines[i].uptime);
+			}
+
+			return uptimeList;
+		}
  }]);
