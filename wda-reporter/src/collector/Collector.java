@@ -1,6 +1,9 @@
 package collector;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a collector object, which is in charge of collecting different
@@ -8,12 +11,12 @@ import java.util.List;
  * and CPU usage.
  * @author javier
  */
-public interface Collector {
+public abstract class Collector {
     /**
      * This are some process statistics that should be collected by any 
      * collector.
      */
-    enum Fact{
+    public enum Fact{
         PID,//a process id 
         CPU,//cpu usage as percentage
         MEM,//memory usage as percentage
@@ -21,6 +24,15 @@ public interface Collector {
         NI,//nice value of a process
         COMM,//command used to execute a process
         USER_NAME,//the name of the user that this process belongs to
+        SYS_CPU_PERCENT,
+        SYS_MEM_TOTAL,
+        SYS_MEM_USED,
+        SYS_MEM_FREE,
+        SYS_MEM_BUFFERS,
+        SYS_SWAP_TOTAL,
+        SYS_SWAP_USED,
+        SYS_SWAP_FREE,
+        SYS_SWAP_CACHED,
     }
     /**
      * Gets @qty amount of processes that are consuming the most amount of
@@ -30,7 +42,36 @@ public interface Collector {
      *         usage from most memory in use to least amount of memory in use.
      *         Null if there was some error.
      */
-    public List<RunningProcess> getTopByMemory(int qty);
+    public List<RunningProcess> getTopByMemory(int qty){
+        //get list of all processes
+        List<RunningProcess> unsorted = getAllProcesses();
+        //return null if error getting all processes
+        if(unsorted == null)return null;
+        //sort the processes by memory
+        Collections.sort(unsorted, (one,two)->{
+            //get first meory value
+            String valueOne = one.getValue(Collector.Fact.MEM.toString());
+            //get second memory value
+            String valueTwo = two.getValue(Collector.Fact.MEM.toString());
+            //get value of first as a double
+            Double vOne = Double.parseDouble(valueOne);
+            //get value of second as a double
+            Double vTwo = Double.parseDouble(valueTwo);
+            //negative if first < second, 0 if first = second, 
+            //and positive if first > second
+            return vOne.compareTo(vTwo);
+        });
+        //list of top qty
+        List<RunningProcess> sorted = new ArrayList<>();
+        int seen = 0;//number of processes seen
+        //go through list of sorted processes starting at the end until begining
+        //or have been through qty processes
+        for(int i = unsorted.size()-1; i>=0 && seen++ < qty;i--)
+            //add to the list of top qty processes
+            sorted.add(unsorted.get(i));
+        //return list of top qty processes
+        return sorted;
+    }
     /**
      * Gets @qty amount of processes that are consuming the most amount of
      * CPU.
@@ -39,10 +80,41 @@ public interface Collector {
      *         usage from most CPU in use to least amount of CPU in use.
      *         Null if there was some error.
      */
-    public List<RunningProcess> getTopByCPU(int qty);
+    public List<RunningProcess> getTopByCPU(int qty){
+        //get list of all processes
+        List<RunningProcess> unsorted = getAllProcesses();
+        //return null if error getting all processes
+        if(unsorted == null)return null;
+        //sort the processes by memory
+        Collections.sort(unsorted, (one,two)->{
+            //get first meory value
+            String valueOne = one.getValue(Collector.Fact.CPU.toString());
+            //get second memory value
+            String valueTwo = two.getValue(Collector.Fact.CPU.toString());
+            //get value of first as a double
+            Double vOne = Double.parseDouble(valueOne);
+            //get value of second as a double
+            Double vTwo = Double.parseDouble(valueTwo);
+            //negative if first < second, 0 if first = second, 
+            //and positive if first > second
+            return vOne.compareTo(vTwo);
+        });
+        //list of top qty
+        List<RunningProcess> sorted = new ArrayList<>();
+        int seen = 0;//number of processes seen
+        //go through list of sorted processes starting at the end until begining
+        //or have been through qty processes
+        for(int i = unsorted.size()-1; i>=0 && seen++ < qty;i--)
+            //add to the list of top qty processes
+            sorted.add(unsorted.get(i));
+        //return list of top qty processes
+        return sorted;
+    }
     /**
      * Collects statistics about all the processes running on the system.
      * @return A list of all running processes without any order. Null if error.
      */
-    public List<RunningProcess> getAllProcesses();
+    public abstract List<RunningProcess> getAllProcesses();
+    
+    public abstract MachineStats getSystemStats();
 }

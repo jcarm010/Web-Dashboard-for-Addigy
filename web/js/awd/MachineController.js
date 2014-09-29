@@ -14,36 +14,85 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
         };
         //an object representing this machine's memory usage
         this.memory = {
-            totalMemory: 16000,
-            usedMemory: 400,
-            usedPercent: function(){
-                return parseInt(this.usedMemory * 100 / this.totalMemory);
+            totalMemory: 0,
+            usedMemory: 0,
+            freeMemory: 0,
+            buffersMemory: 0,
+            usagePercent: function(){
+                return toFixed(this.usagePercentNum(), 2);
+            },
+            usagePercentNum: function(){
+                return this.usedMemory*100/this.totalMemory;
             }
         };
         //an object representing this machine's cpu usage
         this.cpu = {
-            used: 2000,
-            max: 2600,
-            usedPercent: function(){
-                return parseInt(this.used * 100 / this.max);
+            used: 0
+        };
+        
+        this.swap = {
+            totalSwap: 0,
+            usedSwap: 0,
+            freeSwap: 0,
+            cachedSwap: 0,
+            usagePercent: function(){
+                return toFixed(this.usagePercentNum(), 2);
+            },
+            usagePercentNum: function(){
+                return this.usedSwap*100/this.totalSwap;
             }
         };
-        //an object representing this object's network download usage
-        this.networkDown = {
-            used: 20,
-            max: 1000,
-            usedPercent: function(){
-                return parseInt(this.used * 100 / this.max);
-            }
-        };
-        //an object representing this object's network upload usage
-        this.networkUp = {
-            used: 20,
-            max: 1000,
-            usedPercent: function(){
-                return parseInt(this.used * 100 / this.max);
-            }
-        };
+        function toFixed(value, precision) {
+            var precision = precision || 0,
+            neg = value < 0,
+            power = Math.pow(10, precision),
+            value = Math.round(value * power),
+            integral = String((neg ? Math.ceil : Math.floor)(value / power)),
+            fraction = String((neg ? -value : value) % power),
+            padding = new Array(Math.max(precision - fraction.length, 0) + 1).join('0');
+
+            return precision ? integral + '.' +  padding + fraction : integral;
+        }
+        function processSysStats(msg){
+            self.cpu.used = msg.SYS_CPU_PERCENT;
+            
+            self.memory.buffersMemory = msg.SYS_MEM_BUFFERS;
+            self.memory.freeMemory = msg.SYS_MEM_FREE;
+            self.memory.totalMemory = msg.SYS_MEM_TOTAL;
+            self.memory.usedMemory = msg.SYS_MEM_USED;
+            
+            self.swap.cachedSwap = msg.SYS_SWAP_CACHED;
+            self.swap.totalSwap = msg.SYS_SWAP_TOTAL;
+            self.swap.freeSwap = msg.SYS_SWAP_FREE;
+            self.swap.usedSwap = msg.SYS_SWAP_USED;
+            
+            refreshKnobs();
+        }
+        function refreshKnobs(){
+            $("#swap-knob").trigger(
+                'configure',{
+                    "max":self.swap.totalSwap,
+                    "fgColor":self.swap.usagePercentNum()>80?'#e06771':self.swap.usagePercentNum()>60?'#e0b153':'#3c8dbc'
+                }
+            );
+            $("#swap-knob").val(self.swap.usedSwap).trigger('change');
+            
+            $("#memory-usage-knob").trigger(
+                'configure',{
+                    "max":self.memory.totalMemory,
+                    "fgColor":self.memory.usagePercentNum()>80?'#e06771':self.memory.usagePercentNum()>60?'#e0b153':'#3c8dbc'
+                }
+            );
+            $("#memory-usage-knob").val(self.memory.usedMemory).trigger('change');
+            
+            $("#cpu-usage-knob").trigger(
+                'configure',{
+                    "max":100,
+                    "fgColor":self.cpu.used>80?'#e06771':self.cpu.used>60?'#e0b153':'#3c8dbc'
+                }
+            );
+            $("#cpu-usage-knob").val(self.cpu.used).trigger('change');
+        }
         //a container that holds processes running on the machine
         this.processContainer = new ProcessContainer();
         //get the Pubnub keys and initialize pubnub
@@ -53,7 +102,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
             var theChannel = self.machineId;//the channel si the machine id
             PubNub.ngSubscribe({ channel: theChannel });//listen on messages from this channel
             $rootScope.$on(PubNub.ngMsgEv(theChannel), onMessage);//call onMessage when received a message
-            reportPresence();
+            reportPresence({machineId:"reporter"});
         });
         //handles the event of receiving a message
         function onMessage (event, payload) {
@@ -64,32 +113,38 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
             }else if(type === 'singleProcess'){//when received single process data
                 processSingleProcess(msg);//process the single process message
             }else if(type === 'reportRequest'){//if asked to report presence
-                reportPresence();//report presence
+                reportPresence(msg);//report presence
             }else if(type === 'reportPresence'){//if someone reporting presence
                 processPresenceReport(msg);
+            }else if(type === 'sysStats'){
+                processSysStats(msg);
             }
         }
+        //gets the current time of the system
         function getCurrentTime(){
             return new Date().getTime();
         }
+        //processes a request to report presence
         function processPresenceReport(msg){
             if(msg.machineId === self.machineId){
                 self.lastReported = currentTime();
             }
         }
+        //sends a request for computers listening to report
         function sendReportRequest(){
             PubNub.ngPublish({//publish a message asking who is online
                 channel: self.machineId,
-                message: {msgType:"reportRequest"}
+                message: {msgType:"reportRequest",machineId:"web-listener"}
             });
         }
         //reports that this client is listening on this channel
-        function reportPresence(){
-            console.log("reporting presence");
-            PubNub.ngPublish({//publish a message sayimg that i am listening
-                channel: self.machineId,
-                message: {msgType:"reportPresence",machineId:"web-listener"}
-            });
+        function reportPresence(msg){
+            if(msg.machineId!=="web-listener"){
+                PubNub.ngPublish({//publish a message sayimg that i am listening
+                    channel: self.machineId,
+                    message: {msgType:"reportPresence",machineId:"web-listener"}
+                });
+            }
         }
         //process a single process that has been received
         function processSingleProcess(msg){
@@ -190,6 +245,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                     }
                 }
             };
+            //adds process to the end of the processes list
             this.addLastProcess = function(process,timeStamp){
                 if(timeStamp < this.timeStamp) return;
                 this.timeStamp = timeStamp;
@@ -204,16 +260,19 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                     updateMap(position, this.processes.length-1);
                 }
             };
+            //clears the lsit of processes
             this.clear = function(){
                 this.processes = [];
                 this.map = {};
             };
+            //update the map with the processes indexes
             function updateMap(from,to){
                 for(var i = from ; i <= to;i++){
                     var proc = container.processes[i];
                     container.map[proc.id] = i;
                 }
             }
+            //shrinks or extends the list of processes to a size of qty
             function modifyProcessesTo(qty){
                 if(qty>=container.processes.length){
                     while(container.processes.length < qty)
@@ -227,8 +286,10 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 }
             }
         }
+        //describes a process
         function Process(init){
             var self = this;
+            //updates this process with the fields of process
             self.update = function(process){
                 self.id = initOpt("id",process);
                 self.name = initOpt("name",process);
@@ -238,57 +299,16 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 self.nice = initOpt("nice",process);
                 self.user = initOpt("user",process);
             };
+            //start this processes with the fields in init
             self.update(init);
             self.selected = false;
+            //marks this process as selected or unselected
             self.setSelected = function(value){
                 self.selected = value;
             };
+            //returns the value for the field names field of proc
             function initOpt(field, proc){
                 return proc?proc[field]:proc;
             }
-        }
-        var pcount = 2000;
-        $interval(setDummyData,1500);
-        function setDummyData(){
-            
-            self.memory.usedMemory = parseInt(getRandomArbitrary(500,self.memory.totalMemory));
-            $("#memory-usage-knob").trigger(
-                'configure',{
-                    "max":self.memory.totalMemory,
-                    "fgColor":self.memory.usedPercent()>80?'#e06771':self.memory.usedPercent()>60?'#e0b153':'#3c8dbc'
-                }
-            );
-            $("#memory-usage-knob").val(self.memory.usedMemory).trigger('change');
-
-            self.cpu.used = parseInt(getRandomArbitrary(200,self.cpu.max));
-            $("#cpu-usage-knob").trigger(
-                'configure',{
-                    "max":self.cpu.max,
-                    "fgColor":self.cpu.usedPercent()>80?'#e06771':self.cpu.usedPercent()>60?'#e0b153':'#3c8dbc'
-                }
-            );
-            $("#cpu-usage-knob").val(self.cpu.used).trigger('change');
-
-            self.networkDown.used = parseInt(getRandomArbitrary(2,self.networkDown.max));
-            $("#network-down-usage-knob").trigger(
-                'configure',{
-                    "max":self.networkDown.max,
-                    "fgColor":self.networkDown.usedPercent()>80?'#e06771':self.networkDown.usedPercent()>60?'#e0b153':'#3c8dbc'
-                }
-            );
-            $("#network-down-usage-knob").val(self.networkDown.used).trigger('change');
-
-            self.networkUp.used = parseInt(getRandomArbitrary(2,self.networkUp.max));
-            $("#network-up-usage-knob").trigger(
-                'configure',{
-                    "max":self.networkUp.max,
-                    "fgColor":self.networkUp.usedPercent()>80?'#e06771':self.networkUp.usedPercent()>60?'#e0b153':'#3c8dbc'
-                }
-            );
-            $("#network-up-usage-knob").val(self.networkUp.used).trigger('change');
-        }
-        setDummyData();
-        function getRandomArbitrary(min, max) {
-            return parseInt(Math.random() * (max - min) + min);
         }
     }]);

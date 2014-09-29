@@ -54,9 +54,11 @@ public class PubNubReceiver extends Callback implements Receiver{
     /**
      * 
      */
-    private void reportPresence(){
-        String msg = "{\"msgType\":\"reportPresence\",\"machineId\":\""+channel+"\"}";
-        WDAPubNub.getSharedPubNub().publish(channel, msg , this);
+    private void reportPresence(JSONObject obj) throws JSONException{
+        if("web-listener".equals(obj.getString("machineId"))){
+            String msg = "{\"msgType\":\"reportPresence\",\"machineId\":\""+channel+"\"}";
+            WDAPubNub.getSharedPubNub().publish(channel, msg , this);
+        }
     }
     /**
      * 
@@ -75,7 +77,7 @@ public class PubNubReceiver extends Callback implements Receiver{
             String type = obj.getString("msgType");
             switch (type) {
                 case "killRequest": killCommand(obj); break;
-                case "reportRequest": reportPresence(); break;
+                case "reportRequest": reportPresence(obj); break;
                 case "reportPresence": processReportingPresence(obj); break;
             }
         } catch (JSONException | IOException ex) {

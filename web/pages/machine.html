@@ -20,7 +20,7 @@
                        padding: 0px; -webkit-appearance: none;
                        background: none;">
             </div>
-            <div class="knob-label">{{"Memory Usage (MB) - "+machine.memory.usedPercent() + "%"}}</div>
+            <div class="knob-label">{{"Memory Usage (KB) - "+(machine.memory.usagePercent())+ "%"}}</div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-6 text-center">
             <div style="display: inline; width: 90px; height: 90px;">
@@ -37,12 +37,12 @@
                        padding: 0px; -webkit-appearance: none;
                        background: none;">
             </div>
-            <div class="knob-label">{{"CPU Utilization (MHZ) - "+machine.cpu.usedPercent() + "%"}}</div>
+            <div class="knob-label">{{"CPU Utilization (MHZ) - "+machine.cpu.used + "%"}}</div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-6 text-center">
             <div style="display: inline; width: 90px; height: 90px;">
                 <canvas width="90" height="90"></canvas>
-                <input id="network-down-usage-knob" type="text" class="knob" value="30" data-width="90" 
+                <input id="swap-knob" type="text" class="knob" value="30" data-width="90" 
                        data-height="90" data-readonly="true" readonly="readonly"
                        data-fgcolor="black"  data-min="0" data-max="100"
                        style="width: 49px; height: 30px; position: absolute; 
@@ -54,24 +54,7 @@
                        padding: 0px; -webkit-appearance: none;
                        background: none;">
             </div>
-            <div class="knob-label">{{"Network Download Utilization (Mb/s) - "+machine.networkDown.usedPercent() + "%"}}</div>
-        </div>
-        <div class="col-md-3 col-sm-6 col-xs-6 text-center">
-            <div style="display: inline; width: 90px; height: 90px;">
-                <canvas width="90" height="90"></canvas>
-                <input id="network-up-usage-knob" type="text" class="knob" value="30" data-width="90" 
-                       data-height="90" data-readonly="true" readonly="readonly"
-                       data-fgcolor="black"  data-min="0" data-max="100"
-                       style="width: 49px; height: 30px; position: absolute; 
-                       vertical-align: middle; margin-top: 30px; 
-                       margin-left: -69px; border: 0px; font-weight: bold; 
-                       font-style: normal; font-variant: normal; 
-                       font-size: 18px; line-height: normal; font-family: Arial;
-                       text-align: center; color: rgb(60, 141, 188); 
-                       padding: 0px; -webkit-appearance: none;
-                       background: none;">
-            </div>
-            <div class="knob-label">{{"Network Upload Utilization (Mb/s) - "+machine.networkUp.usedPercent() + "%"}}</div>
+            <div class="knob-label">{{"Swap Usage(KB) - "+machine.swap.usagePercent() + "%"}}</div>
         </div>
     </div>
     <div ng-show="machine.machineOnline()" class="row">

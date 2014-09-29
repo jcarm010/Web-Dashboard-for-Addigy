@@ -10,6 +10,6 @@ public class CollectorFactory {
      * @return A collector that uses the PS command.
      */
     public static Collector getCollector(){
-        return new PSCollector();
+        return new TopCollector();
     }
 }
