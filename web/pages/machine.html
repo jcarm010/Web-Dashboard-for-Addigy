@@ -1,7 +1,10 @@
 <!-- Machine Page -->
 <div ng-controller="MachineCtrl as machine">
-    <div class="container"><h3>ID: {{machine.machineId}}</h3></div>
-    <div class="row">
+    <div class="container">
+        <h3>ID: {{machine.machineId}}</h3>
+        <span class="badge bg-{{machine.machineOnline()?'green':'red'}}">{{machine.machineOnline()?'Online':'Offline'}}</span>
+    </div>
+    <div ng-show="machine.machineOnline()" class="row">
         <div class="col-md-3 col-sm-6 col-xs-6 text-center">
             <div style="display: inline; width: 90px; height: 90px;">
                 <canvas width="90" height="90"></canvas>
@@ -17,7 +20,7 @@
                        padding: 0px; -webkit-appearance: none;
                        background: none;">
             </div>
-            <div class="knob-label">{{"Memory Usage (MB) - "+machine.memory.usedPercent() + "%"}}</div>
+            <div class="knob-label">{{"Memory Usage (KB) - "+(machine.memory.usagePercent())+ "%"}}</div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-6 text-center">
             <div style="display: inline; width: 90px; height: 90px;">
@@ -34,12 +37,12 @@
                        padding: 0px; -webkit-appearance: none;
                        background: none;">
             </div>
-            <div class="knob-label">{{"CPU Utilization (MHZ) - "+machine.cpu.usedPercent() + "%"}}</div>
+            <div class="knob-label">{{"CPU Utilization (MHZ) - "+machine.cpu.used + "%"}}</div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-6 text-center">
             <div style="display: inline; width: 90px; height: 90px;">
                 <canvas width="90" height="90"></canvas>
-                <input id="network-down-usage-knob" type="text" class="knob" value="30" data-width="90" 
+                <input id="swap-knob" type="text" class="knob" value="30" data-width="90" 
                        data-height="90" data-readonly="true" readonly="readonly"
                        data-fgcolor="black"  data-min="0" data-max="100"
                        style="width: 49px; height: 30px; position: absolute; 
@@ -51,48 +54,41 @@
                        padding: 0px; -webkit-appearance: none;
                        background: none;">
             </div>
-            <div class="knob-label">{{"Network Download Utilization (Mb/s) - "+machine.networkDown.usedPercent() + "%"}}</div>
-        </div>
-        <div class="col-md-3 col-sm-6 col-xs-6 text-center">
-            <div style="display: inline; width: 90px; height: 90px;">
-                <canvas width="90" height="90"></canvas>
-                <input id="network-up-usage-knob" type="text" class="knob" value="30" data-width="90" 
-                       data-height="90" data-readonly="true" readonly="readonly"
-                       data-fgcolor="black"  data-min="0" data-max="100"
-                       style="width: 49px; height: 30px; position: absolute; 
-                       vertical-align: middle; margin-top: 30px; 
-                       margin-left: -69px; border: 0px; font-weight: bold; 
-                       font-style: normal; font-variant: normal; 
-                       font-size: 18px; line-height: normal; font-family: Arial;
-                       text-align: center; color: rgb(60, 141, 188); 
-                       padding: 0px; -webkit-appearance: none;
-                       background: none;">
-            </div>
-            <div class="knob-label">{{"Network Upload Utilization (Mb/s) - "+machine.networkUp.usedPercent() + "%"}}</div>
+            <div class="knob-label">{{"Swap Usage(KB) - "+machine.swap.usagePercent() + "%"}}</div>
         </div>
     </div>
-    <div class="row">
+    <div ng-show="machine.machineOnline()" class="row">
         <div class="box">
             <div class="box-header">
-                <h3 class="box-title">Processes</h3>
+                <h3 class="box-title">Processes - Top {{machine.processContainer.processes.length}}</h3>
             </div><!-- /.box-header -->
             <div class="box-body">
-                <table class="table table-bordered">
-                    <tbody><tr>
+                <div class="container">
+                    <a href="" ng-click="machine.processContainer.killSelected()"
+                       class="btn btn-danger" role="button">Halt</a>
+                </div>
+                <table class="table table-bordered top5">
+                    <tbody>
+                    <tr>
+                        <th><input type="checkbox" ng-model="machine.processContainer.allSelected"
+                                   ng-click="machine.processContainer.toggleAllProcesses()"/></th>    
                         <th style="width: 10px">Id</th>
                         <th>Name</th>
                         <th>CPU</th>
                         <th>Memory</th>
+                        <th>User</th>
                         <th>Priority</th>
                         <th>Nice</th>
                     </tr>
-                    <tr ng-repeat="process in machine.processes">
+                    <tr ng-show="process.id!==null" ng-repeat="process in machine.processContainer.processes">
+                        <td><input ng-model="process.selected" type="checkbox"/></td>
                         <td>{{process.id}}</td>
                         <td>{{process.name}}</td>
                         <td><span class="badge bg-{{process.cpu>80?'red':process.cpu>60?'yellow':'green'}}">
                                 {{process.cpu+"%"}}
                         </span></td>
                         <td><span class="badge bg-{{process.memory>80?'red':process.memory>60?'yellow':'green'}}">{{process.memory+"%"}}</span></td>
+                        <td><span class="badge bg-blue">{{process.user}}</span></td>
                         <td><span class="badge bg-blue">{{process.priority}}</span></td>
                         <td><span class="badge bg-blue">{{process.nice}}</span></td>
                     </tr>
