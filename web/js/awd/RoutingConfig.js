@@ -31,6 +31,6 @@ app.config(['$routeProvider','$locationProvider', function($routeProvider, $loca
                         return "/dashboard";
                     return "/login";
                 };
-        })()
-    });
+            })()
+        });
 }]);

@@ -1,0 +1,17 @@
+<div class="box-body table-responsive" style="overflow-y: auto; overflow-x: none;">
+    <div id="example2_wrapper" class="dataTables_wrapper form-inline" role="grid"><div class="row"><div class="col-xs-6"></div><div class="col-xs-6"></div></div><table id="example2" class="table table-bordered table-hover dataTable" aria-describedby="example2_info">
+        <thead>
+            <tr role="row">
+                <th class="sorting" role="columnheader" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Connector ID: activate to sort column ascending">Connector ID</th>
+                <th class="sorting_desc" role="columnheader" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="descending" aria-label="User: activate to sort column ascending">User</th>
+                <th class="sorting" role="columnheader" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Warranty Date: activate to sort column ascending">Warranty Date</th></tr>
+        </thead>
+        <tbody role="alert" aria-live="polite" aria-relevant="all">
+            <tr class="odd" ng-repeat="machine in machines">
+                <td class="">{{machine.connectorid}}</td>
+                <td class="">{{machine.sp_user_name}}</td>
+                <td class="">{{machine.apple_warranty}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
