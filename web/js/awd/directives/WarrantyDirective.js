@@ -8,7 +8,7 @@ app.directive('wdaWarrantyChart', function ($compile) {
 	    replace: true,
 	    link: function(scope, elem, attrs, ctrl) {
 
-	      console.log(scope);
+	      console.log(scope.machines);
 	    }
 	};
 });
