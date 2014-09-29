@@ -1,5 +1,43 @@
-app.directive('wdaBarChart', function () {
-    
+app.directive('wdaUptimeChart', function () {
+    return{
+        restrict: 'AE',
+        replace: true,
+        link: function(scope, elem, attrs){
+            
+            var bars = null;
+
+            // If the data changes somehow, update it in the chart
+            scope.$watch(attrs.ngModel, function(machines){
+                // Sometimes the machines are empty, 
+                // in which case, don't update the chart with null data
+                if(typeof machines == 'undefined') return;
+
+                if(!bars) {
+                    bars = Morris.Bar({
+                      element: elem,
+                      data: machines,
+                      xkey: 'sp_user_name',
+                      ykeys: ['uptime'],
+                      labels: ['Uptime'],
+                      barColors: ['#333'],
+                      resize: true,
+                      hideHover: true,
+                      hoverCallback: function (index, options, content, machine) {
+                        picture = (machine.uptime>100)?'avatar.png':'avatar2.png'; // Test
+                        content = '<div class="morris-hover-row-label">Renan Han (renan)</div><div class="morris-hover-point" style="color: #333;"> Uptime: 173</div>';
+                        return '<img class="left" src="/img/' + picture + '" style="height: 50px;">' +
+                                '<br>' +
+                                '<div class="right">Machine: ' + machine.sp_user_name + '</div>' +
+                                '<div class="right">Uptime: ' + machine.uptime + ' days</div>';
+                      }
+                    });
+                } else {
+                    bars.setData(machines);
+                }
+            });
+        }
+    };
+
     function getData(machines) {
         var data = [];
 
@@ -10,40 +48,4 @@ app.directive('wdaBarChart', function () {
 
         return data;
     }
-
-    return{
-        restrict: 'A',
-        replace: true,
-        link: function(scope, elem, attrs){
-            
-            var bars = null;
-
-            /*var options = {
-                type: 'bar',
-                height: 100,
-                barColor: '#333',
-                barWidth: 20,
-                barSpacing: 5
-            };*/
-            
-            // If the data changes somehow, update it in the chart
-            scope.$watch(attrs.ngModel, function(machines){
-                // Sometimes the machines are empty
-                if(typeof machines == 'undefined') return;
-
-                elem.context.innerHTML = "";  // Removes the current charts in the HTML
-
-                bar = Morris.Bar({
-                  element: elem,
-                  data: getData(machines),
-                  xkey: 'machine',
-                  ykeys: ['uptime'],
-                  labels: ['Uptime']
-                });
-
-                //bars = elem.sparkline(v, options);
-                //elem.show();
-            });
-        }
-    };
 });
