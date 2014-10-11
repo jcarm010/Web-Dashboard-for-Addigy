@@ -2,7 +2,7 @@
 <html ng-app="awdapp">
     <head>
         <meta charset="UTF-8">
-        <title>Addigy</title>
+        <title>Addigy | Dashboard</title>
         <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
         <!-- bootstrap 3.0.2 -->
         <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
         <header class="header" ng-controller="UserMenu as userMenu">
             <a href="index.html" class="logo">
                 <!-- Add the class icon to your logo image or logo icon to add the margining -->
-                Addigy
+                <img id="logo" src="./img/logos/addigy_logo.png" height="45px" width="120px"/>
             </a>
             <!-- Header Navbar: style can be found in header.less -->
             <nav ng-show="userMenu.user.hasLoggedIn()" class="navbar navbar-static-top" role="navigation">
@@ -285,7 +285,7 @@
                 <!-- sidebar: style can be found in sidebar.less -->
                 <section class="sidebar">
                     <!-- Sidebar user panel -->
-                    <div class="user-panel">
+                    <!--<div class="user-panel">
                         <div class="pull-left image">
                             <img src="img/avatar3.png" class="img-circle" alt="User Image" />
                         </div>
@@ -294,7 +294,7 @@
 
                             <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
                         </div>
-                    </div>
+                    </div>-->
                     <!-- search form
                     <form action="#" method="get" class="sidebar-form">
                         <div class="input-group">
