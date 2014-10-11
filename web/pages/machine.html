@@ -4,7 +4,14 @@
         <h3>ID: {{machine.machineId}}</h3>
         <span class="badge bg-{{machine.machineOnline()?'green':'red'}}">{{machine.machineOnline()?'Online':'Offline'}}</span>
     </div>
-    <div ng-show="machine.machineOnline()" class="row">
+    <div ng-show="machine.machineOnline()" class="container"> <!---->
+        <div class="col-md-10 col-sm-6 col-xs-6 text-center">
+            <canvas id="myCanvas" width="150" height="100" >
+                Your browser does not support the HTML5 canvas tag.
+            </canvas>
+        </div>
+    </div>
+    <div ng-show="!machine.machineOnline()" class="row">
         <div class="col-md-3 col-sm-6 col-xs-6 text-center">
             <div style="display: inline; width: 90px; height: 90px;">
                 <canvas width="90" height="90"></canvas>
@@ -20,7 +27,7 @@
                        padding: 0px; -webkit-appearance: none;
                        background: none;">
             </div>
-            <div class="knob-label">{{"Memory Usage (KB) - "+(machine.memory.usagePercent())+ "%"}}</div>
+            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"Memory Usage (MB) - "+(machine.memory.usagePercent())+ "%"}}</div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-6 text-center">
             <div style="display: inline; width: 90px; height: 90px;">
@@ -37,7 +44,7 @@
                        padding: 0px; -webkit-appearance: none;
                        background: none;">
             </div>
-            <div class="knob-label">{{"CPU Utilization (MHZ) - "+machine.cpu.used + "%"}}</div>
+            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"CPU Utilization (Percent) - "+machine.cpu.usagePercent() + "%"}}</div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-6 text-center">
             <div style="display: inline; width: 90px; height: 90px;">
@@ -54,9 +61,10 @@
                        padding: 0px; -webkit-appearance: none;
                        background: none;">
             </div>
-            <div class="knob-label">{{"Swap Usage(KB) - "+machine.swap.usagePercent() + "%"}}</div>
+            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"Swap Usage(MB) - "+machine.swap.usagePercent() + "%"}}</div>
         </div>
     </div>
+    
     <div ng-show="machine.machineOnline()" class="row">
         <div class="box">
             <div class="box-header">

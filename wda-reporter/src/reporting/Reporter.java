@@ -12,8 +12,8 @@ import comm.Publisher;
 import comm.PublisherFactory;
 import comm.Receiver;
 import comm.ReceiverFactory;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import screen.ScreenCapture;
 
 /**
  * Handles reporting of the collection of data.
@@ -23,7 +23,7 @@ public class Reporter {
     //indicates whether to continue running
     private static CountDownLatch latch = new CountDownLatch(1);
     private static boolean running = true;
-    private static final int intervalTime = 5000;
+    private static final int intervalTime = 1000;
     private static boolean hasListeners = false;
     //path to settings file
     public static final String settingsDir = System.getProperty("user.home")+
@@ -48,6 +48,7 @@ public class Reporter {
     }
     public static void startBroadcastingSingleProcesses(Collector collector, Publisher pub){
         while(running){
+            
             MachineStats sysStats = collector.getSystemStats();
             JSONObject sys = sysStats.toJson();
             accumulateJson(sys,"msgType", "sysStats");
@@ -64,6 +65,18 @@ public class Reporter {
                 accumulateJson(obj, "total", processes.size());
                 accumulateJson(obj, "process", processes.get(i).toJson());
                 pub.broadcastMessage(obj);
+            }
+            ScreenCapture capture = ScreenCapture.takeScreenshot();
+            if(capture != null){
+                String [][] pix = capture.getRgbMap();
+                for(int i = 0 ; i < pix.length ; i++){
+                    JSONObject obj = new JSONObject();
+                    accumulateJson(obj,"msgType","thumbRow");
+                    accumulateJson(obj,"num",i);
+                    for(int j = 0 ; j < pix[0].length;j++)
+                        appendJson(obj,"row", pix[i][j]);
+                    pub.broadcastMessage(obj);
+                }
             }
             latch = new CountDownLatch(1);
             JSONObject reportRequest = getReportRequest();
@@ -124,6 +137,13 @@ public class Reporter {
     private static void accumulateJson(JSONObject obj,String key, Object value){
         try{
             obj.accumulate(key, value);
+        }catch(JSONException err){
+            err.printStackTrace(System.err);
+        }
+    }
+    private static void appendJson(JSONObject obj,String key, Object value){
+        try{
+            obj.append(key, value);
         }catch(JSONException err){
             err.printStackTrace(System.err);
         }

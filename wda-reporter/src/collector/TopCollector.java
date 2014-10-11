@@ -13,7 +13,8 @@ import java.util.Scanner;
  * @author javier
  */
 public class TopCollector extends Collector{
-    private static final String COMMAND = "top -b -s -n 1";
+    private static final String COMMAND_HEADER = "top -b -n 2";
+    private static final String COMMAND_PROCESS = "top -b -n 1";
     private static final int PROCESS_HEADER_LINE = 7;
     private static final int CPU_LINE = 2;
     private static final int MEM_LINE = 3;
@@ -31,7 +32,7 @@ public class TopCollector extends Collector{
     @SuppressWarnings("empty-statement")
     public List<RunningProcess> getAllProcesses() {
         List<RunningProcess> processes = new ArrayList<>();
-        BufferedReader reader = runTop();
+        BufferedReader reader = runTop(TopCollector.COMMAND_PROCESS);
         int lineNo = 0;
         String line;
         try {
@@ -90,9 +91,9 @@ public class TopCollector extends Collector{
      * 
      * @return 
      */
-    private static BufferedReader runTop(){
+    private static BufferedReader runTop(String command){
         try {
-            Process p = Runtime.getRuntime().exec(COMMAND);
+            Process p = Runtime.getRuntime().exec(command);
             InputStream in = p.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
             return reader;
@@ -108,10 +109,12 @@ public class TopCollector extends Collector{
         MachineStats stats = new MachineStats();
         int lineNo = 0;
         String line;
-        BufferedReader reader = runTop();
+        BufferedReader reader = runTop(TopCollector.COMMAND_HEADER);
         Scanner lineScan;
+        int commands = 0;
         try {
-            while((line = reader.readLine())!=null && ++lineNo<=CPU_LINE);
+            while((line = reader.readLine())!=null && (line.startsWith("top")?commands++:commands)<2);
+            while((line = reader.readLine())!=null && ++lineNo<CPU_LINE-1);
             if(line!=null){
                 double usage = 0;
                 lineScan = new Scanner(line);

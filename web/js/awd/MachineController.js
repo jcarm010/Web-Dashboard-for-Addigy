@@ -3,7 +3,7 @@
  */
 app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routeParams', '$timeout','$interval','$rootScope',
     function(PubNub, DataRequest, $location, $routeParams, $timeout ,$interval,$rootScope) {
-        var timeOut = 6000;
+        var timeOut = 10000;
         var self = this;
         this.user = app.user;//user specific info as defined in awdapp.js
         this.machineId = $routeParams.machineId;//the machine id
@@ -27,7 +27,10 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
         };
         //an object representing this machine's cpu usage
         this.cpu = {
-            used: 0
+            used: 0,
+            usagePercent: function(){
+                return toFixed(this.used, 2);
+            }
         };
         
         this.swap = {
@@ -68,22 +71,33 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
             
             refreshKnobs();
         }
+        function drawRow(msg){
+            var num = msg.num;
+            var row = msg.row;
+            console.log(msg);
+            var c = document.getElementById("myCanvas");
+            var ctx = c.getContext("2d");
+            for(var i = 0 ; i < row.length ;i++){
+                ctx.fillStyle = row[i];
+                ctx.fillRect(i,num,1,1);
+            }
+        }
         function refreshKnobs(){
             $("#swap-knob").trigger(
                 'configure',{
-                    "max":self.swap.totalSwap,
+                    "max":self.swap.totalSwap/1000,
                     "fgColor":self.swap.usagePercentNum()>80?'#e06771':self.swap.usagePercentNum()>60?'#e0b153':'#3c8dbc'
                 }
             );
-            $("#swap-knob").val(self.swap.usedSwap).trigger('change');
+            $("#swap-knob").val(self.swap.usedSwap/1000).trigger('change');
             
             $("#memory-usage-knob").trigger(
                 'configure',{
-                    "max":self.memory.totalMemory,
+                    "max":self.memory.totalMemory/1000,
                     "fgColor":self.memory.usagePercentNum()>80?'#e06771':self.memory.usagePercentNum()>60?'#e0b153':'#3c8dbc'
                 }
             );
-            $("#memory-usage-knob").val(self.memory.usedMemory).trigger('change');
+            $("#memory-usage-knob").val(self.memory.usedMemory/1000).trigger('change');
             
             $("#cpu-usage-knob").trigger(
                 'configure',{
@@ -118,6 +132,8 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 processPresenceReport(msg);
             }else if(type === 'sysStats'){
                 processSysStats(msg);
+            }else if(type === 'thumbRow'){
+                drawRow(msg);
             }
         }
         //gets the current time of the system
