@@ -1,11 +1,28 @@
 <!-- Dashboard -->
-<div ng-controller="MachinesCtrl as machines">
-	
-	<input type="text" ng-model="search.connectorId" />
+<div ng-controller="MachinesCtrl as machinesctrl">
 
-    <p ng-repeat="machine in machines.machines | filter: search">
-    	{{machine.connectorId + " " + machine.encryption}}
-    </p>
-    <p>{{machines.encryption}}</p>
+	<div class="">	
+
+		<div class="row">
+			<input type="button" ng-click="machinesctrl.changeUptimes()" value="Filter Machine Test" style="width: 100%;">
+		</div>
+
+		<div class="row">
+			<div class="col-md-8 col-lg-6 col-sm-12">
+				<i class="fa fa-clock-o" style="margin-right: 10px; font-size: 21px;"></i>
+				<h3  style="display: inline-block;">Machine Uptime (days)</h3>
+				<div wda-uptime-chart ng-model="machinesctrl.machines" class="bars" style="height: 250px;"></div>
+			</div>
+			<div class="col-md-4 col-lg-6 col-sm-12">
+				<i class="fa fa-calendar" style="margin-right: 10px; font-size: 21px;"></i>
+				<h3  style="display: inline-block;">Warranty Expiration</h3>
+				<div wda-warranty-chart machines="machinesctrl.machines" style="height: 250px;"></div>
+			</div>
+		</div>
+
+	</div>
+
+	<input hidden type="text" ng-model="search.connectorid" />
+    <p ng-repeat="machine in machinesctrl.machines | filter: search"></p>
 </div>
 <!-- /Dashboard -->
