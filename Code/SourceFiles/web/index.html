@@ -375,10 +375,12 @@
         <script src="js/plugins/angularjs/angular.min.js" type="text/javascript"></script>
         <script src="js/plugins/angularjs/pubnub-angular.js" type="text/javascript"></script>
         <script src="js/plugins/angularjs/angular-route.min.js" type="text/javascript"></script>
+        <!-- GoogleMaps.js -->
+        <script src="https://maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyB37HR1BPv0qDfqSN31ZIyduAoJzXDpwjk" type="text/javascript"></script>
         <!-- AWD APP -->
         <script src="js/awd/Awdapp.js" type="text/javascript"></script>
         <script src="js/awd/DataRequestFactory.js" type="text/javascript"></script>
-        <script src="js/awd/MachineService.js" type="text/javascript"></script>
+        <script src="js/awd/MachineFactory.js" type="text/javascript"></script>
         <script src="js/awd/Utilities.js" type="text/javascript"></script>
         <script src="js/awd/RoutingConfig.js" type="text/javascript"></script>
         <script src="js/awd/UserMenuController.js" type="text/javascript"></script>
@@ -387,10 +389,20 @@
         <script src="js/awd/LoginController.js" type="text/javascript"></script>
         <script src="js/awd/MachineController.js" type="text/javascript"></script>
         <script src="js/awd/MachinesController.js" type="text/javascript"></script>
+        <script src="js/awd/MapController.js" type="text/javascript"></script>
 
         <!-- Directives -->
         <script src="js/awd/directives/UptimeDirective.js" type="text/javascript"></script>
         <script src="js/awd/directives/WarrantyDirective.js" type="text/javascript"></script>
+        <script src="js/awd/directives/MapDirective.js" type="text/javascript"></script>
+        <script>
+        var myOptions = {
+                zoom: 6,
+                center: new google.maps.LatLng(46.87916, -3.32910),
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+        var map = new google.maps.Map(document.getElementById('gmap'), myOptions);
+      </script>
 
     </body>
 </html>

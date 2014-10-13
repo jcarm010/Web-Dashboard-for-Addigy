@@ -1,4 +1,4 @@
-app.service('MachineService', ['DataRequest', function(DataRequest) {
+app.service('MachineFactory', ['DataRequest', function(DataRequest) {
 	var me = this;
 	me.machines;
 

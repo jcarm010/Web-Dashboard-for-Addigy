@@ -8,6 +8,14 @@
 		</div>
 
 		<div class="row">
+			<div class="col-md-12 col-lg-12 col-sm-12" ng-controller="MapCtrl">
+				<i class="fa fa-globe" style="margin-right: 10px; font-size: 21px;"></i>
+				<h3  style="display: inline-block;">Machine Locations</h3>
+	        	<map id="map_canvas" style="width: 100%; height: 300px; border: 2px solid #555" ng-model="machinesctrl.machines"></map>
+	    	</div>
+		</div>
+
+		<div class="row">
 			<div class="col-md-8 col-lg-6 col-sm-12">
 				<i class="fa fa-clock-o" style="margin-right: 10px; font-size: 21px;"></i>
 				<h3  style="display: inline-block;">Machine Uptime (days)</h3>
