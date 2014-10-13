@@ -137,8 +137,8 @@ var Machines = (function () {
 /*
  * This controller handles functionality related to the multiple machines page
  */
-app.controller('MachinesCtrl', ['MachineService', '$location', '$routeParams', '$interval','$rootScope',
-    function(MachineService, $location, $routeParams, $interval,$rootScope) {
+app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '$interval','$rootScope',
+    function(MachineFactory, $location, $routeParams, $interval,$rootScope) {
     	var self = this;
     	self.user = app.user;	//User info as defined in awdapp.js
 		self.user.username = "javier";
@@ -148,7 +148,7 @@ app.controller('MachinesCtrl', ['MachineService', '$location', '$routeParams', '
 		// Gets the machines from the MachineService provider. The call back is needed because the value
 		// the service use a PROMISE in order to fetch the data. The callback is then used inside of the
 		// Service when the data is finally retrieved. (Thanks to JavaScript Asynchronous behavior... -_- )
-		self.machines = MachineService.update(function(machines){ 
+		self.machines = MachineFactory.update(function(machines){ 
 			self.machines = machines;
 			self.machinesBackup = self.machines; 
 			self.uptimes = getUptimes();
