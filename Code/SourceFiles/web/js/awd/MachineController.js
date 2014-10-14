@@ -72,9 +72,9 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
             refreshKnobs();
         }
         function drawRow(msg){
+            self.lastReported = getCurrentTime();
             var num = msg.num;
             var row = msg.row;
-            console.log(msg);
             var c = document.getElementById("myCanvas");
             var ctx = c.getContext("2d");
             for(var i = 0 ; i < row.length ;i++){
