@@ -1,8 +1,9 @@
 /*
  * This controller handles functionality related to the single machine page
  */
-app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routeParams', '$timeout','$interval','$rootScope',
-    function(PubNub, DataRequest, $location, $routeParams, $timeout ,$interval,$rootScope) {
+app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routeParams', '$timeout','$interval','$rootScope','$scope',
+    function(PubNub, DataRequest, $location, $routeParams, $timeout ,$interval,$rootScope,$scope) {
+        
         var timeOut = 10000;
         var self = this;
         this.user = app.user;//user specific info as defined in awdapp.js
@@ -116,6 +117,8 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
             var theChannel = self.machineId;//the channel si the machine id
             PubNub.ngSubscribe({ channel: theChannel });//listen on messages from this channel
             $rootScope.$on(PubNub.ngMsgEv(theChannel), onMessage);//call onMessage when received a message
+            PubNub.ngSubscribe({ channel: theChannel+"-stream" });//listen on messages from this channel
+            $rootScope.$on(PubNub.ngMsgEv(theChannel+"-stream"), onMessage);//call onMessage when received a message
             reportPresence({machineId:"reporter"});
         });
         //handles the event of receiving a message
@@ -134,6 +137,8 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 processSysStats(msg);
             }else if(type === 'thumbRow'){
                 drawRow(msg);
+            }else if(type === 'chatMsg'){
+                self.chat.messageReceived(msg);
             }
         }
         //gets the current time of the system
@@ -301,6 +306,58 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                     }
                 }
             }
+        }
+        self.chat = {
+            messages: [],
+            showing: false,
+            expanded: false,
+            message: "",
+            sendMessage: function(){
+                var theMsg = this.message;
+                this.message="";
+                PubNub.ngPublish({//publish a message asking who is online
+                    channel: self.machineId,
+                    message: {msgType:"chatMsg",sender:"Admin",msg:theMsg}
+                });
+            },
+            messageReceived: function(msg){
+                console.log("Received: ");
+                var currTime = getCurrentTime();
+                var date = new Date;
+                date.setTime(currTime);
+                var minutes = date.getMinutes();
+                var hour = date.getHours();
+                var ampm = "am";
+                if(hour>12){
+                    hour = hour%12;
+                    ampm = "pm";
+                }
+                msg.time = hour+":"+minutes+""+ampm;
+                this.messages.push(msg);
+//                $scope.apply();
+                setTimeout(function(){
+                    console.log("Scrolling");
+                    scrollDown("#chatWindow");
+                },5000);
+                
+                console.log(msg);
+            }
+        };
+        self.command = {
+            showing: false,
+            expanded: false
+        };
+        self.expandWindows = function(evt){
+            evt.preventDefault();
+            evt.stopPropagation();
+            self.chat.expanded = !self.chat.expanded;
+            self.command.expanded = !self.command.expanded;
+        };
+        scrollDown("#commandWindow");
+        scrollDown("#chatWindow");
+        function scrollDown(selector){
+            var scrollTo_val = $(selector).prop('scrollHeight') + 'px';
+            $(selector).slimScroll({ scrollTo : scrollTo_val });
         }
         //describes a process
         function Process(init){

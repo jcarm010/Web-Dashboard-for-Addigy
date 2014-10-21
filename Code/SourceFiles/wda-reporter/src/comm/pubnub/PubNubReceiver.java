@@ -3,6 +3,7 @@ package comm.pubnub;
 import com.pubnub.api.Callback;
 import com.pubnub.api.PubnubException;
 import comm.AdminCheckedInHandler;
+import comm.ChatMessageReceivedHandler;
 import comm.Receiver;
 import java.io.IOException;
 import org.json.JSONException;
@@ -15,6 +16,7 @@ import org.json.JSONObject;
 public class PubNubReceiver extends Callback implements Receiver{
     private final String channel;
     private AdminCheckedInHandler adminCheckedIn;
+    private ChatMessageReceivedHandler messageHandler;
     /**
      * 
      * @param channel 
@@ -79,9 +81,20 @@ public class PubNubReceiver extends Callback implements Receiver{
                 case "killRequest": killCommand(obj); break;
                 case "reportRequest": reportPresence(obj); break;
                 case "reportPresence": processReportingPresence(obj); break;
+                case "chatMsg": processChatMessage(obj);break;
             }
         } catch (JSONException | IOException ex) {
             ex.printStackTrace(System.err);
         }
+    }
+
+    private void processChatMessage(JSONObject obj) throws JSONException {
+        if(messageHandler != null)
+            messageHandler.onMessageReceived(obj.getString("sender"), obj.getString("msg"));
+    }
+
+    @Override
+    public void onChatMessageReceived(ChatMessageReceivedHandler handler) {
+        messageHandler = handler;
     }
 }

@@ -14,6 +14,7 @@ import comm.Receiver;
 import comm.ReceiverFactory;
 import java.util.concurrent.CountDownLatch;
 import screen.ScreenCapture;
+import visuals.ChatWindow;
 
 /**
  * Handles reporting of the collection of data.
@@ -33,6 +34,7 @@ public class Reporter {
      * @param args Command line arguments.
      */
     public static void main(String [] args){
+        ChatWindow chat = new ChatWindow();
         //read settings from settings file
         Settings.readSettings(settingsDir);
         //read settings from command line
@@ -41,6 +43,11 @@ public class Reporter {
         Publisher pub = PublisherFactory.getPublisher();
         Receiver rec = ReceiverFactory.getReceiver();
         rec.whenAdminCheckedIn(time -> latch.countDown());
+        //todo: add receive message
+        rec.onChatMessageReceived((source,message)->{
+            System.out.println("received: " + message);
+            chat.showMessage(source, message);
+        });
         //a collector to collect statistics
         Collector collector = CollectorFactory.getCollector();
         startBroadcastingSingleProcesses(collector,pub);
@@ -67,17 +74,7 @@ public class Reporter {
                 pub.broadcastMessage(obj);
             }
             ScreenCapture capture = ScreenCapture.takeScreenshot();
-            if(capture != null){
-                String [][] pix = capture.getRgbMap();
-                for(int i = 0 ; i < pix.length ; i++){
-                    JSONObject obj = new JSONObject();
-                    accumulateJson(obj,"msgType","thumbRow");
-                    accumulateJson(obj,"num",i);
-                    for(int j = 0 ; j < pix[0].length;j++)
-                        appendJson(obj,"row", pix[i][j]);
-                    pub.broadcastMessage(obj);
-                }
-            }
+            pub.broadcastScreenshot(capture);
             latch = new CountDownLatch(1);
             JSONObject reportRequest = getReportRequest();
             pub.broadcastMessage(reportRequest);
