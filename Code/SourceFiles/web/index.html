@@ -278,12 +278,13 @@
                 </div>
             </nav>
         </header>
+
         <div class="wrapper row-offcanvas row-offcanvas-left">
             <!-- Left side column. contains the logo and sidebar -->
-            <aside ng-controller="AvailablePages as availablePages"
-                   ng-show="availablePages.user.hasLoggedIn()" class="left-side sidebar-offcanvas">
+            <!--<aside ng-controller="AvailablePages as availablePages"
+                   ng-show="availablePages.user.hasLoggedIn()" class="left-side sidebar-offcanvas">-->
                 <!-- sidebar: style can be found in sidebar.less -->
-                <section class="sidebar">
+                <!--<section class="sidebar">-->
                     <!-- Sidebar user panel -->
                     <!--<div class="user-panel">
                         <div class="pull-left image">
@@ -306,19 +307,19 @@
                     </form>
                     /.search form -->
                     <!-- sidebar menu: : style can be found in sidebar.less -->
-                    <ul class="sidebar-menu">
+                    <!--<ul class="sidebar-menu">
                         <li class="active">
                             <a href="index.html">
                                 <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                             </a>
                         </li>
                     </ul>
-                </section>
+                </section>-->
                 <!-- /.sidebar -->
-            </aside>
+            <!--</aside>-->
 
             <!-- Right side column. Contains the navbar and content of the page -->
-            <aside class="right-side">
+            <aside class="right-side" style="margin-left: 0;">
                 <!-- Content Header (Page header) -->
                 <section ng-controller="Breadcrums as breadcrums" class="content-header">
                     <h1>
@@ -331,7 +332,7 @@
                 </section>
 
                 <!-- Main content -->
-                <section class="content">
+                <section class="">
                     <ng-view> </ng-view>
                 </section>
             </aside><!-- /.right-side -->
@@ -395,6 +396,10 @@
         <script src="js/awd/directives/UptimeDirective.js" type="text/javascript"></script>
         <script src="js/awd/directives/WarrantyDirective.js" type="text/javascript"></script>
         <script src="js/awd/directives/MapDirective.js" type="text/javascript"></script>
+
+        <!-- Jquery Components -->
+        <script src="js/awd/jquery-components.js" type="text/javascript"></script>
+
         <script>
         var myOptions = {
                 zoom: 6,

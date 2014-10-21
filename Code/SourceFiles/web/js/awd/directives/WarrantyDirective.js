@@ -7,8 +7,6 @@ app.directive('wdaWarrantyChart', function ($compile) {
 	    templateUrl: '/pages/directives/warrantyDirective.html',
 	    replace: true,
 	    link: function(scope, elem, attrs, ctrl) {
-
-	      console.log(scope.machines);
 	    }
 	};
 });
