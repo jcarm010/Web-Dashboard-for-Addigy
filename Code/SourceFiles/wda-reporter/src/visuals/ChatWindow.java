@@ -2,6 +2,8 @@ package visuals;
 
 import java.awt.Image;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
 import javax.swing.ImageIcon;
 
 /**
@@ -10,6 +12,7 @@ import javax.swing.ImageIcon;
  */
 public class ChatWindow extends javax.swing.JFrame {
     private final StringBuilder chatHistory;
+    private MessageSentListener messageSent;
     /**
      * Creates new form ChatWindow
      */
@@ -19,9 +22,19 @@ public class ChatWindow extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         this.setTitle("Chat");
         chatHistory = new StringBuilder();
+        messageSent = null;
     }
     public void showMessage(String source, String msg){
-        chatHistory.append(source).append(": ").append(msg);
+        Calendar now = Calendar.getInstance();
+        int hour = now.get(Calendar.HOUR_OF_DAY);
+        int minute = now.get(Calendar.MINUTE);
+        String ampm = "am";
+        if(hour > 12){
+            ampm = "pm";
+            hour = hour % 12;
+        }
+        chatHistory.append(String.format("%02d:%02d %s",hour,minute,ampm)).append(" - ")
+                       .append(source).append(": ").append(msg);
         if(!msg.endsWith("\n"))
             chatHistory.append("\n");
         conversation.setText(chatHistory.toString());
@@ -41,6 +54,17 @@ public class ChatWindow extends javax.swing.JFrame {
             return null;
         }
     }
+    private void sendMessage(String msg){
+        if(!msg.isEmpty() && this.messageSent!=null)
+            this.messageSent.onMessageSent(msg);
+    }
+    public void setMessageSentListener(MessageSentListener listener){
+        this.messageSent = listener;
+    }
+    
+    public static interface MessageSentListener{
+        public void onMessageSent(String msg);
+    }
     
 
     /**
@@ -57,8 +81,8 @@ public class ChatWindow extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         conversation = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea2 = new javax.swing.JTextArea();
-        jButton1 = new javax.swing.JButton();
+        writeArea = new javax.swing.JTextArea();
+        sendButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
@@ -74,11 +98,21 @@ public class ChatWindow extends javax.swing.JFrame {
         conversation.setRows(5);
         jScrollPane1.setViewportView(conversation);
 
-        jTextArea2.setColumns(20);
-        jTextArea2.setRows(5);
-        jScrollPane2.setViewportView(jTextArea2);
+        writeArea.setColumns(20);
+        writeArea.setRows(5);
+        writeArea.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                writeAreaKeyReleased(evt);
+            }
+        });
+        jScrollPane2.setViewportView(writeArea);
 
-        jButton1.setText("Send");
+        sendButton.setText("Send");
+        sendButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sendButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -94,7 +128,7 @@ public class ChatWindow extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)))
+                        .addComponent(sendButton)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -106,7 +140,7 @@ public class ChatWindow extends javax.swing.JFrame {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
+                    .addComponent(sendButton, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -124,6 +158,19 @@ public class ChatWindow extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
+        sendMessage(writeArea.getText());
+        writeArea.setText(null);
+    }//GEN-LAST:event_sendButtonActionPerformed
+
+    private void writeAreaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_writeAreaKeyReleased
+        char pressed = evt.getKeyChar();
+        if(pressed == '\n'){
+            sendMessage(writeArea.getText());
+            writeArea.setText(null);
+        }
+    }//GEN-LAST:event_writeAreaKeyReleased
 
     /**
      * @param args the command line arguments
@@ -162,11 +209,11 @@ public class ChatWindow extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea conversation;
-    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextArea jTextArea2;
     private javax.swing.JLabel logo;
+    private javax.swing.JButton sendButton;
+    private javax.swing.JTextArea writeArea;
     // End of variables declaration//GEN-END:variables
 }

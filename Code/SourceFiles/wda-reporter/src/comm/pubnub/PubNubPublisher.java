@@ -49,6 +49,15 @@ public class PubNubPublisher extends Callback implements Publisher {
             }
         }
     }
+    
+    @Override
+    public void broadcastMessage(String msg) {
+        JSONObject obj = new JSONObject();
+        accumulateJson(obj,"msgType","chatMsg");
+        accumulateJson(obj,"sender", System.getProperty("user.name"));
+        accumulateJson(obj,"msg",msg);
+        WDAPubNub.getSharedPubNub().publish(this.channel, obj , this);
+    }
     private static void accumulateJson(JSONObject obj,String key, Object value){
         try{
             obj.accumulate(key, value);

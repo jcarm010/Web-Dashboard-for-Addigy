@@ -18,4 +18,6 @@ public interface Publisher {
      * @param capture The screenshot to send
      */
     public void broadcastScreenshot(ScreenCapture capture);
+    
+    public void broadcastMessage(String msg);
 }

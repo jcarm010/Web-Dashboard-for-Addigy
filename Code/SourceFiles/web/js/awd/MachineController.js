@@ -309,6 +309,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
         }
         self.chat = {
             messages: [],
+            msgContainer: new Chat(),
             showing: false,
             expanded: false,
             message: "",
@@ -321,7 +322,6 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 });
             },
             messageReceived: function(msg){
-                console.log("Received: ");
                 var currTime = getCurrentTime();
                 var date = new Date;
                 date.setTime(currTime);
@@ -332,15 +332,12 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                     hour = hour%12;
                     ampm = "pm";
                 }
-                msg.time = hour+":"+minutes+""+ampm;
-                this.messages.push(msg);
-//                $scope.apply();
-                setTimeout(function(){
-                    console.log("Scrolling");
-                    scrollDown("#chatWindow");
-                },5000);
-                
-                console.log(msg);
+                msg.time = hour+":"+(minutes>9?minutes:"0"+minutes)+""+ampm;
+                this.msgContainer.addMessage(msg);
+            },
+            keyPressed: function(event){
+                if(event.keyCode === 13)//enter was pressed
+                    this.sendMessage();
             }
         };
         self.command = {
@@ -382,6 +379,35 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
             //returns the value for the field names field of proc
             function initOpt(field, proc){
                 return proc?proc[field]:proc;
+            }
+        }
+        //the single page chat
+        function Chat(){
+            this.msgContainer = $('#chatWindow div').eq(0);
+            this.addMessage = function(msg){
+                var item = getChatItem(msg);
+                this.msgContainer.append(item);
+                scrollDown("#chatWindow");
+            };
+            function getSender(msg){
+                var link = $('<a href="" class="name"></a>');
+                link.html('<small class="text-muted pull-right"><i class="fa fa-clock-o"></i> '+msg.time+'</small>'+msg.sender);
+                return link;
+            }
+            function getMessageHolder(msg){
+                var holder = $('<p class="message"></p>');
+                holder.append(getSender(msg));
+                holder.html(holder.html()+msg.msg);
+                return holder;
+            }
+            function getProfileImage(){
+                return $('<img src="img/man.png" alt="user image" class="online">');
+            }
+            function getChatItem(msg){
+                var item =  $('<div class="item"></div>');
+                item.append(getProfileImage());
+                item.append(getMessageHolder(msg));
+                return item;
             }
         }
     }]);

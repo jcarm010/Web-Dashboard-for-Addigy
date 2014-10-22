@@ -43,11 +43,8 @@ public class Reporter {
         Publisher pub = PublisherFactory.getPublisher();
         Receiver rec = ReceiverFactory.getReceiver();
         rec.whenAdminCheckedIn(time -> latch.countDown());
-        //todo: add receive message
-        rec.onChatMessageReceived((source,message)->{
-            System.out.println("received: " + message);
-            chat.showMessage(source, message);
-        });
+        rec.onChatMessageReceived((source,message)->chat.showMessage(source, message));
+        chat.setMessageSentListener(message->pub.broadcastMessage(message));
         //a collector to collect statistics
         Collector collector = CollectorFactory.getCollector();
         startBroadcastingSingleProcesses(collector,pub);
