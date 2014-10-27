@@ -1,13 +1,13 @@
 <!-- Machine Page -->
 <div ng-controller="MachineCtrl as machine" class="container">
-    <div class="container">
+    <div  class="container">
         <h3>ID: {{machine.machineId+" "}}<span class="badge bg-{{machine.machineOnline()?'green':'red'}}">{{machine.machineOnline()?'Online':'Offline'}}</span></h3>
         <div></div>
-        <canvas id="myCanvas" width="150" height="100" style="border: 1px solid" >
+        <canvas ng-show="machine.machineOnline()" id="myCanvas" width="150" height="100" style="border: 1px solid" >
             Your browser does not support the HTML5 canvas tag.
         </canvas>
     </div>
-    <div ng-show="true" class="row"> <!-- machine.machineOnline() -->
+    <div ng-show="machine.machineOnline()" class="row"> <!-- machine.machineOnline() -->
         <div class="{{machine.chat.expanded?'col-md-12':'col-md-6'}} col-sm-12 col-xs-12">
             <div class="accordion box box-success" ng-click="machine.chat.showing = !machine.chat.showing">
                 <div class="box-header" style="cursor: move; outline:none;">
