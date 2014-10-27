@@ -172,17 +172,17 @@
 					<i class="fa fa-clock-o" style="margin-right: 10px; font-size: 21px;"></i>
 					<h3  style="display: inline-block;">Uptime</h3>
 					<div id="uptime" class="buttons">
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-success" ng-click="machinesctrl.updatePanel(machinesctrl.machineUptimes.low, 'uptime', 'Uptime', 'days', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineUptimes.low.length}}</h3 style="line-height: 2px;">
-							<p>< 1 Day</p>
+						<button type="button" class="btn btn-success" ng-click="machinesctrl.updatePanel(machinesctrl.machineUptimes.low, 'uptime', 'Uptime', 'days', $event)" ng-disabled="machinesctrl.machineUptimes.low.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineUptimes.low.length}}</p>
+							<p class="machine-property-description">< 1 Day</p>
 						</button>
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-warning" ng-click="machinesctrl.updatePanel(machinesctrl.machineUptimes.mid, 'uptime', 'Uptime', 'days', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineUptimes.mid.length}}</h3 style="line-height: 2px;">
-							<p>< 7 Days</p>
+						<button type="button" class="btn btn-warning" ng-click="machinesctrl.updatePanel(machinesctrl.machineUptimes.mid, 'uptime', 'Uptime', 'days', $event)" ng-disabled="machinesctrl.machineUptimes.mid.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineUptimes.mid.length}}</p>
+							<p class="machine-property-description">< 7 Days</p>
 						</button>
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-danger" ng-click="machinesctrl.updatePanel(machinesctrl.machineUptimes.high, 'uptime', 'Uptime', 'days', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineUptimes.high.length}}</h3 style="line-height: 2px;">
-							<p> 7 Days +</p>
+						<button type="button" class="btn btn-danger" ng-click="machinesctrl.updatePanel(machinesctrl.machineUptimes.high, 'uptime', 'Uptime', 'days', $event)" ng-disabled="machinesctrl.machineUptimes.high.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineUptimes.high.length}}</p>
+							<p class="machine-property-description"> 7 Days +</p>
 						</button>
 					</div>
 				</div>
@@ -191,17 +191,17 @@
 					<i class="fa fa-th" style="margin-right: 10px; font-size: 21px;"></i>
 					<h3  style="display: inline-block;">Memory</h3>
 					<div id="memory" class="buttons">
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-success" ng-click="machinesctrl.updatePanel(machinesctrl.machineMemories.high, 'sp_physical_memory', 'Memory', 'GB', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineMemories.high.length}}</h3 style="line-height: 2px;">
-							<p>8GB +</p>
+						<button type="button" class="btn btn-success" ng-click="machinesctrl.updatePanel(machinesctrl.machineMemories.high, 'sp_physical_memory', 'Memory', 'GB', $event)" ng-disabled="machinesctrl.machineMemories.high.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineMemories.high.length}}</p>
+							<p class="machine-property-description">8GB +</p>
 						</button>
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-warning" ng-click="machinesctrl.updatePanel(machinesctrl.machineMemories.mid, 'sp_physical_memory', 'Memory', 'GB', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineMemories.mid.length}}</h3 style="line-height: 2px;">
-							<p>4GB +</p>
+						<button type="button" class="btn btn-warning" ng-click="machinesctrl.updatePanel(machinesctrl.machineMemories.mid, 'sp_physical_memory', 'Memory', 'GB', $event)" ng-disabled="machinesctrl.machineMemories.mid.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineMemories.mid.length}}</p>
+							<p class="machine-property-description">4GB +</p>
 						</button>
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-danger" ng-click="machinesctrl.updatePanel(machinesctrl.machineMemories.low, 'sp_physical_memory', 'Memory', 'GB', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineMemories.low.length}}</h3 style="line-height: 2px;">
-							<p>< 4GB</p>
+						<button type="button" class="btn btn-danger" ng-click="machinesctrl.updatePanel(machinesctrl.machineMemories.low, 'sp_physical_memory', 'Memory', 'GB', $event)" ng-disabled="machinesctrl.machineMemories.low.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineMemories.low.length}}</p>
+							<p class="machine-property-description">< 4GB</p>
 						</button>
 					</div>
 				</div>
@@ -210,17 +210,17 @@
 					<i class="fa fa-hdd-o" style="margin-right: 10px; font-size: 21px;"></i>
 					<h3  style="display: inline-block;">Disk Space</h3>
 					<div id="disk" class="buttons">
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-success" ng-click="machinesctrl.updatePanel(machinesctrl.machineDiskSpace.low, 'swapfree_mb', 'Disk Space Left', 'MB', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineDiskSpace.low.length}}</h3 style="line-height: 2px;">
-							<p>< 80%</p>
+						<button type="button" class="btn btn-success" ng-click="machinesctrl.updatePanel(machinesctrl.machineDiskSpace.low, 'swapfree_mb', 'Disk Space Left', 'MB', $event)" ng-disabled="machinesctrl.machineDiskSpace.low.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineDiskSpace.low.length}}</p>
+							<p class="machine-property-description">< 80%</p>
 						</button>
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-warning" ng-click="machinesctrl.updatePanel(machinesctrl.machineDiskSpace.mid, 'swapfree_mb', 'Disk Space Left', 'MB', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineDiskSpace.mid.length}}</h3 style="line-height: 2px;">
-							<p>80% +</p>
+						<button type="button" class="btn btn-warning" ng-click="machinesctrl.updatePanel(machinesctrl.machineDiskSpace.mid, 'swapfree_mb', 'Disk Space Left', 'MB', $event)" ng-disabled="machinesctrl.machineDiskSpace.mid.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineDiskSpace.mid.length}}</p>
+							<p class="machine-property-description">80% +</p>
 						</button>
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-danger" ng-click="machinesctrl.updatePanel(machinesctrl.machineDiskSpace.high, 'swapfree_mb', 'Disk Space Left', 'MB', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineDiskSpace.high.length}}</h3 style="line-height: 2px;">
-							<p>90% +</p>
+						<button type="button" class="btn btn-danger" ng-click="machinesctrl.updatePanel(machinesctrl.machineDiskSpace.high, 'swapfree_mb', 'Disk Space Left', 'MB', $event)" ng-disabled="machinesctrl.machineDiskSpace.high.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineDiskSpace.high.length}}</p>
+							<p class="machine-property-description">90% +</p>
 						</button>
 					</div>
 				</div>
@@ -229,17 +229,17 @@
 					<i class="fa fa-calendar" style="margin-right: 10px; font-size: 21px;"></i>
 					<h3  style="display: inline-block;">Warranty</h3>
 					<div id="uptime" class="buttons">
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-success" ng-click="machinesctrl.updatePanel(machinesctrl.machineWarranty.low, 'apple_warranty', 'Warranty', '', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineWarranty.low.length}}</h3 style="line-height: 2px;">
-							<p>30+ Days</p>
+						<button type="button" class="btn btn-success" ng-click="machinesctrl.updatePanel(machinesctrl.machineWarranty.low, 'apple_warranty', 'Warranty', '', $event)" ng-disabled="machinesctrl.machineWarranty.low.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineWarranty.low.length}}</p>
+							<p class="machine-property-description">30+ Days</p>
 						</button>
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-warning" ng-click="machinesctrl.updatePanel(machinesctrl.machineWarranty.mid, 'apple_warranty', 'Warranty', '', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineWarranty.mid.length}}</h3 style="line-height: 2px;">
-							<p>7-30 Days</p>
+						<button type="button" class="btn btn-warning" ng-click="machinesctrl.updatePanel(machinesctrl.machineWarranty.mid, 'apple_warranty', 'Warranty', '', $event)" ng-disabled="machinesctrl.machineWarranty.mid.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineWarranty.mid.length}}</p>
+							<p class="machine-property-description">7-30 Days</p>
 						</button>
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-danger" ng-click="machinesctrl.updatePanel(machinesctrl.machineWarranty.high, 'apple_warranty', 'Warranty', '', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineWarranty.high.length}}</h3 style="line-height: 2px;">
-							<p>< 7 Days</p>
+						<button type="button" class="btn btn-danger" ng-click="machinesctrl.updatePanel(machinesctrl.machineWarranty.high, 'apple_warranty', 'Warranty', '', $event)" ng-disabled="machinesctrl.machineWarranty.high.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineWarranty.high.length}}</p>
+							<p class="machine-property-description">< 7 Days</p>
 						</button>
 					</div>
 				</div>
@@ -255,13 +255,13 @@
 					<i class="fa fa-key" style="margin-right: 10px; font-size: 21px;"></i>
 					<h3  style="display: inline-block;">Encryption</h3>
 					<div id="encryption" class="buttons">
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-success" ng-click="machinesctrl.updatePanel(machinesctrl.machineEncryption.yes, 'swapencrypted', 'Encryption', '', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineEncryption.yes.length}}</h3 style="line-height: 2px;">
-							<p>True</p>
+						<button type="button" class="btn btn-success" ng-click="machinesctrl.updatePanel(machinesctrl.machineEncryption.yes, 'swapencrypted', 'Encryption', '', $event)" ng-disabled="machinesctrl.machineEncryption.yes.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineEncryption.yes.length}}</p>
+							<p class="machine-property-description">True</p>
 						</button>
-						<button style="height: 74px; width: 74px;" type="button" class="btn btn-danger" ng-click="machinesctrl.updatePanel(machinesctrl.machineEncryption.no, 'swapencrypted', 'Encryption', '', $event)">
-							<h3 style="line-height: 2px;">{{machinesctrl.machineEncryption.no.length}}</h3 style="line-height: 2px;">
-							<p>False</p>
+						<button type="button" class="btn btn-danger" ng-click="machinesctrl.updatePanel(machinesctrl.machineEncryption.no, 'swapencrypted', 'Encryption', '', $event)" ng-disabled="machinesctrl.machineEncryption.no.length == 0">
+							<p class="machine-counter">{{machinesctrl.machineEncryption.no.length}}</p>
+							<p class="machine-property-description">False</p>
 						</button>
 					</div>	
 				</div>
@@ -270,19 +270,20 @@
 						<i class="fa fa-laptop" style="margin-right: 10px; font-size: 21px;"></i>
 						<h3  style="display: inline-block;">Machine Types</h3>
 					</div>
-					<div ng-click="machinesctrl.updatePanel(machinesctrl.machineType.air, 'sp_machine_name', 'Type', '', $event)" style="display: inline-block; cursor: pointer;">
+					<div ng-click="machinesctrl.updatePanel(machinesctrl.machineType.air, 'sp_machine_name', 'Type', '', $event)" style="display: inline-block; cursor: pointer;" ng-disabled="machinesctrl.machineType.air.length == 0">
 						<img src="/img/machines/macbookair.png" height="80">
-						<div style="position: relative;/* display: inline; */color: #FFF;text-shadow: -1px 0 4px #333;top: -70px;left: 31px;width: 85px;background-color: rgba(0, 0, 0, 0.3);font-size: 31px;"><p>{{machinesctrl.machineType.air.length}}</p></div>
+						<div style="position: relative;/* display: inline; */color: #FFF;text-shadow: -1px 0 4px #333;top: -70px;left: 31px;width: 85px;background-color: rgba(0, 0, 0, 0.3);font-size: 31px;"><p class="text-stroke">{{machinesctrl.machineType.air.length}}</p></div>
 					</div>
 
-					<div ng-click="machinesctrl.updatePanel(machinesctrl.machineType.mini, 'sp_machine_name', 'Type', '', $event)" style="display: inline-block; cursor: pointer;">
+					<div ng-click="machinesctrl.updatePanel(machinesctrl.machineType.mini, 'sp_machine_name', 'Type', '', $event)" style="display: inline-block; cursor: pointer;" ng-disabled="machinesctrl.machineType.mini.length == 0">
 						<img src="/img/machines/macmini.png" height="80" width="150">
-						<div style="position: relative;/* display: inline; */color: #FFF;text-shadow: -1px 0 4px #333;top: -47px;left: 17px;width: 115px;height: 41px;background-color: rgba(0, 0, 0, 0.1);font-size: 31px;"><p>{{machinesctrl.machineType.mini.length}}</p></div>
+						<div style="position: relative;/* display: inline; */color: #FFF;text-shadow: -1px 0 4px #333;top: -47px;left: 17px;width: 115px;height: 41px;background-color: rgba(0, 0, 0, 0.1);font-size: 31px;">
+						<p class="text-stroke">{{machinesctrl.machineType.mini.length}}</p></div>
 					</div>
 
-					<div ng-click="machinesctrl.updatePanel(machinesctrl.machineType.pro, 'sp_machine_name', 'Type', '', $event)" style="display: inline-block; cursor: pointer;">
+					<div ng-click="machinesctrl.updatePanel(machinesctrl.machineType.pro, 'sp_machine_name', 'Type', '', $event)" style="display: inline-block; cursor: pointer;" ng-disabled="machinesctrl.machineType.pro.length == 0">
 						<img src="/img/machines/macbookpro.png" height="80">
-						<div style="position: relative;/* display: inline; */color: #FFF;text-shadow: -1px 0 4px #333;top: -70px;left: 31px;width: 85px;background-color: rgba(0, 0, 0, 0.3);font-size: 31px;"><p>{{machinesctrl.machineType.pro.length}}</p></div>
+						<div style="position: relative;/* display: inline; */color: #FFF;text-shadow: -1px 0 4px #333;top: -70px;left: 31px;width: 85px;background-color: rgba(0, 0, 0, 0.3);font-size: 31px;"><p class="text-stroke">{{machinesctrl.machineType.pro.length}}</p></div>
 					</div>
 				</div>
 			</div>
