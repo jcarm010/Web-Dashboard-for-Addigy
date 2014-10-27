@@ -4,3 +4,39 @@
 .top15 { margin-top:15px; }
 .top17 { margin-top:17px; }
 .top30 { margin-top:30px; }
+
+.text-stroke {
+	text-shadow:
+    -1px -1px 0 #333,
+    1px -1px 0 #333,
+    -1px 1px 0 #333,
+    1px 1px 0 #333;
+}
+
+/* Content Panl Buttons */
+.content-panel button {
+	display: block;
+	height: 46px;
+	width: 100%;
+	margin-top: 2px;
+}
+
+.content-panel button .machine-counter{
+	display: inline-block;
+	float: right;
+	margin: 0;
+	font-weight: bold;
+	font-size: 20px;
+	text-shadow:
+    -1px -1px 0 #333,
+    1px -1px 0 #333,
+    -1px 1px 0 #333,
+    1px 1px 0 #333; 
+}
+
+.content-panel button .machine-property-description {
+	display: inline-block;
+	float: left;
+	margin: 0;
+	font-size: 16px;
+}
