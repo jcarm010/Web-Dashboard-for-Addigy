@@ -23,6 +23,41 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			self.machinePanel.secondary = secon;
 			self.machinePanel.suffix = suffix;
 			self.machinePanel.lastClicked = $event.target;
+			self.machineSingleView.view = false;
+		}
+
+		// Single Machine Panel
+		self.machineSingleView = {
+			machine: null,
+			view: false
+		}
+
+		// Toggles the Single View side panel
+		self.toggleSingleView = function() {
+			self.machineSingleView.view = !self.machineSingleView.view;
+		}
+
+		// Sets up the single Machine for the panel
+		self.getSingleMachine = function(id){
+			for(var i = 0; i < self.machines.length; i++) {
+				if(self.machines[i].connectorid === id){
+					self.machineSingleView.machine = self.machines[i];
+					self.toggleSingleView();
+				}
+			}
+		}
+		
+		// Gets the image for the correct machine type
+		self.getMachineImage = function(type){
+			if(type == "MacBook Pro"){
+				return "/img/machines/macbookpro.png";
+			} else if(type == "MacBook Air"){
+				return "/img/machines/macbookair.png";
+			} else if(type == "Mac Mini"){
+				return "/img/machines/macmini.png";
+			}
+
+			return "";
 		}
 
 		//Machine Uptimes
@@ -60,6 +95,12 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			air: []
 		}
 
+		// Machine Encryption
+		self.machineEncryption = {
+			yes: [],
+			no: []
+		}
+
 		var flag = 0;
 
 		// Gets the machines from the MachineService provider. The call back is needed because the value
@@ -78,6 +119,7 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			self.machineDiskSpace = getDiskSpace();
 			self.machineWarranty = getWarranty();
 			self.machineType = getMachineTypes();
+			self.machineEncryption = getEncryptions();
 
 			if(self.machinePanel.lastClicked){
 				$timeout(function() {
@@ -196,6 +238,19 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			return machines;
 		}
 
+		function getEncryptions() {
+			var encryption = {yes: [], no: []};
+
+			for(var i = 0; i < self.machines.length; i++) {
+				if(!self.machines.swapencrypted){
+					encryption.yes.push(self.machines[i]);
+				} else {
+					encryption.no.push(self.machines[i]);
+				}
+			}
+
+			return encryption;
+		}
 
 		self.changeUptimes = function() {
 			newMachines = [];
