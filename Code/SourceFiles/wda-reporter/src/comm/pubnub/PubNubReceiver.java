@@ -6,6 +6,8 @@ import comm.AdminCheckedInHandler;
 import comm.ChatMessageReceivedHandler;
 import comm.Receiver;
 import java.io.IOException;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,11 +19,13 @@ public class PubNubReceiver extends Callback implements Receiver{
     private final String channel;
     private AdminCheckedInHandler adminCheckedIn;
     private ChatMessageReceivedHandler messageHandler;
+    private final Sigar sigar;
     /**
      * 
      * @param channel 
      */
     public PubNubReceiver(String channel){
+        sigar = new Sigar();
         this.channel = channel;
         adminCheckedIn = null;
         subscribe();
@@ -50,8 +54,12 @@ public class PubNubReceiver extends Callback implements Receiver{
         System.out.println("kill request >>>");    
         System.out.println(obj);
         String pid = obj.getString("pid");
-        if(pid != null)
-            Runtime.getRuntime().exec("kill -9 "+pid);
+        if(pid != null && !pid.trim().equals("null"))
+            try{
+                sigar.kill(Long.parseLong(pid), "SIGTERM");//
+            }catch(SigarException err){
+                err.printStackTrace(System.err);
+            }
     }
     /**
      * 

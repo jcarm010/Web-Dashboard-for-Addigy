@@ -1,0 +1,1 @@
+java -jar wda-reporter.jar channel my_machine pubkey pub-c-a5d02d60-4f7a-4147-b11b-5c7fa4c82916 subkey sub-c-0b9253c0-3dc1-11e4-8947-02ee2ddab7fe

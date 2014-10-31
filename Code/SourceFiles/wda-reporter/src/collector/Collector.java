@@ -3,7 +3,6 @@ package collector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a collector object, which is in charge of collecting different
