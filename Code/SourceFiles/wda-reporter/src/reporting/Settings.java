@@ -36,7 +36,8 @@ public class Settings {
                 }
             }
         } catch (FileNotFoundException ex) {
-            ex.printStackTrace(System.err);
+//            ex.printStackTrace(System.err);
+            System.out.println("No settings file found in:"+filePath);
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
         }

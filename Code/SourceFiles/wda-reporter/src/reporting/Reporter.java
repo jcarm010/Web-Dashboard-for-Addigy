@@ -24,8 +24,7 @@ public class Reporter {
     //indicates whether to continue running
     private static CountDownLatch latch = new CountDownLatch(1);
     private static boolean running = true;
-    private static final int intervalTime = 1000;
-    private static boolean hasListeners = false;
+    private static final int intervalTime = 2000;
     //path to settings file
     public static final String settingsDir = System.getProperty("user.home")+
             File.separator+".wda-settings";
@@ -52,7 +51,6 @@ public class Reporter {
     }
     public static void startBroadcastingSingleProcesses(Collector collector, Publisher pub){
         while(running){
-            
             MachineStats sysStats = collector.getSystemStats();
             JSONObject sys = sysStats.toJson();
             accumulateJson(sys,"msgType", "sysStats");
@@ -121,9 +119,7 @@ public class Reporter {
     }
     private static void takeBreak(){
         try{
-            System.out.println("*************Taking Break******************");
             Thread.sleep(intervalTime);
-            System.out.println("*************Back from Break***************");
         }catch(InterruptedException err){
             err.printStackTrace(System.err);
         }

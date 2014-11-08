@@ -1,20 +1,21 @@
 package screen;
 
 import java.awt.AWTException;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import javax.imageio.ImageIO;
 
 /**
  *
  * @author javier
  */
 public class ScreenCapture {
+    private static final String SHOTS_DIR = "shots";
     private static final int THUMB_WIDTH = 150;
     private static final int THUMB_HEIGHT = 100;
     private final BufferedImage img;
@@ -37,6 +38,19 @@ public class ScreenCapture {
             }
         return map;
     }
+    public String saveToFile(){
+        String path = "sshot.jpg";
+        try {
+            // retrieve image
+            BufferedImage bi = img;
+            File outputfile = new File(path);
+            ImageIO.write(bi, "jpg", outputfile);
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+            return null;
+        }
+        return path;
+    }
     public static ScreenCapture takeScreenshot(){
         Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
         BufferedImage capture = null;
@@ -50,20 +64,5 @@ public class ScreenCapture {
         BufferedImage img = new BufferedImage(THUMB_WIDTH, THUMB_HEIGHT, BufferedImage.TYPE_INT_RGB);
         img.createGraphics().drawImage(thumb,0,0,null);
         return new ScreenCapture(img);
-    }
-    
-    public static BufferedImage scale(BufferedImage sbi, int imageType, int dWidth, int dHeight, double fWidth, double fHeight) {
-        BufferedImage dbi = null;
-        if(sbi != null) {
-            dbi = new BufferedImage(dWidth, dHeight, imageType);
-            Graphics2D g = dbi.createGraphics();
-            AffineTransform at = AffineTransform.getScaleInstance(fWidth, fHeight);
-            g.drawRenderedImage(sbi, at);
-        }
-        return dbi;
-    }
-    
-    public static void main(String [] args) throws AWTException, IOException{
-        takeScreenshot();
     }
 }

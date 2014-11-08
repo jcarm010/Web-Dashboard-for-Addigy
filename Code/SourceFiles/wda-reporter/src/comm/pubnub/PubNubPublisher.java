@@ -4,8 +4,10 @@ import com.pubnub.api.Callback;
 import com.pubnub.api.PubnubError;
 import org.json.JSONObject;
 import comm.Publisher;
+import java.io.File;
 import org.json.JSONException;
 import screen.ScreenCapture;
+import utils.Utils;
 
 /**
  *  A publisher that uses the PubNub services to publish data.
@@ -28,7 +30,7 @@ public class PubNubPublisher extends Callback implements Publisher {
     }
     @Override
     public void successCallback(String channel, Object response) {
-//        System.out.println(response.toString());
+//        System.out.println("After send: "+response.toString());
     }
     @Override
     public void errorCallback(String channel, PubnubError error) {
@@ -37,17 +39,15 @@ public class PubNubPublisher extends Callback implements Publisher {
 
     @Override
     public void broadcastScreenshot(ScreenCapture capture) {
-        if(capture != null){
-            String [][] pix = capture.getRgbMap();
-            for(int i = 0 ; i < pix.length ; i++){
-                JSONObject obj = new JSONObject();
-                accumulateJson(obj,"msgType","thumbRow");
-                accumulateJson(obj,"num",i);
-                for(int j = 0 ; j < pix[0].length;j++)
-                    appendJson(obj,"row", pix[i][j]);
-                WDAPubNub.getSharedPubNub().publish(this.streamChannel, obj , this);
-            }
-        }
+        String path = capture.saveToFile();
+        if(path==null)return;
+        String remote = Utils.uploadImage(path, channel);
+        if(remote == null)return;
+        JSONObject obj = new JSONObject();
+        accumulateJson(obj,"msgType", "sshot");
+        accumulateJson(obj,"path", remote);
+        WDAPubNub.getSharedPubNub().publish(this.channel, obj , this);
+        new File(path).delete();
     }
     
     @Override

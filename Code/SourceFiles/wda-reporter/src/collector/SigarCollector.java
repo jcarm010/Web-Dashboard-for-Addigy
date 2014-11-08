@@ -50,6 +50,7 @@ public class SigarCollector extends Collector{
                 process.addFact(Collector.Fact.USER_NAME.toString(), user);
                 processes.add(process);
             } catch (SigarException ex) {
+                if(ex.getMessage().equals("No such process")) continue;
                 ex.printStackTrace(System.err);
             }
         }

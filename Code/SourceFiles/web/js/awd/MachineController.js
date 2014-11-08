@@ -46,6 +46,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 return this.usedSwap*100/this.totalSwap;
             }
         };
+        this.round = function(value,precision){ return toFixed(value,precision);};
         function toFixed(value, precision) {
             var precision = precision || 0,
             neg = value < 0,
@@ -135,11 +136,23 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 processPresenceReport(msg);
             }else if(type === 'sysStats'){
                 processSysStats(msg);
-            }else if(type === 'thumbRow'){
-                drawRow(msg);
-            }else if(type === 'chatMsg'){
-                self.chat.messageReceived(msg);
             }
+            //else if(type === 'thumbRow'){//depricating this feature: too slow
+            //    drawRow(msg);
+            //}
+            else if(type === 'chatMsg'){
+                self.chat.messageReceived(msg);
+            }else if(type === 'sshot'){
+                loadNewSShot(msg);
+            }else if(type === 'cmdout'){
+                self.command.cmdOutput(msg);
+            }else if(type === 'reportPort'){
+                self.netStats.addPort(msg);
+            }
+        }
+        function loadNewSShot(msg){
+            var path = "uploads/"+msg.path;
+            $('#sshot').attr("src", path);
         }
         //gets the current time of the system
         function getCurrentTime(){
@@ -342,8 +355,62 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
         };
         self.command = {
             showing: false,
-            expanded: false
+            expanded: false,
+            cmd:"",
+            cmdOutput: function(msg){
+                var line = $('<div class="item"><span>'+msg.stamp+'</span> > '+msg.line+'</div>');
+                $('#cmdout').append(line);
+                scrollDown("#commandWindow");
+            },
+            sendCmd:function(){
+                var cmd = this.cmd.trim();
+                this.cmd = "";
+                PubNub.ngPublish({//publish a message with command
+                    channel: self.machineId,
+                    message: {msgType:"runcmd",cmd:cmd}
+                });
+                var line = $('<div class="item"><span></span> > '+cmd+'</div>');
+                $('#cmdout').append(line);
+                scrollDown("#commandWindow");
+            },
+            keyPressed: function(event){
+                if(event.keyCode === 13)//enter was pressed
+                    this.sendCmd();
+            }
         };
+        
+        this.netStats = {
+            showing: false,
+            expanded: false,
+            ports: [],
+            expandWindow: function(evt){
+                evt.preventDefault();
+                evt.stopPropagation();
+                this.expanded = !this.expanded;
+            },
+            toggleShow: function(){
+                this.showing = !this.showing;
+                if(this.ports.length===0) this.fetchNew();
+            },
+            refresh: function(evt){
+                console.log("refreshing");
+                evt.preventDefault();
+                evt.stopPropagation();
+                this.fetchNew();
+            },
+            fetchNew: function(){
+                this.ports = [];
+                PubNub.ngPublish({//publish a message asking who is online
+                    channel: self.machineId,
+                    message: {msgType:"reqnetstats"}
+                });
+            },
+            addPort: function(msg){
+                this.ports.push(msg);
+            }
+            
+        };
+        
         self.expandWindows = function(evt){
             evt.preventDefault();
             evt.stopPropagation();

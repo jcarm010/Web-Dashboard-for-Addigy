@@ -2,15 +2,66 @@
 <div ng-controller="MachineCtrl as machine" class="container">
     <div  class="container">
         <h3>ID: {{machine.machineId+" "}}<span class="badge bg-{{machine.machineOnline()?'green':'red'}}">{{machine.machineOnline()?'Online':'Offline'}}</span></h3>
-        <div></div>
-        <canvas ng-show="machine.machineOnline()" id="myCanvas" width="150" height="100" style="border: 1px solid" >
-            Your browser does not support the HTML5 canvas tag.
-        </canvas>
+        <div class="col-md-3 col-sm-6 col-xs-6 text-center">
+            <image ng-show="machine.machineOnline()" id="sshot" src="" width="150" height="100" style="display: inline; border: 1px solid"/>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-6 text-center" ng-show="machine.machineOnline()">
+            <div style="display: inline; width: 90px; height: 90px;">
+                <canvas width="90" height="90"></canvas>
+                <input id="memory-usage-knob" type="text" class="knob" value="30" data-width="90" 
+                       data-height="90" data-readonly="true" readonly="readonly"
+                       data-fgcolor="black"  data-min="0" data-max="100"
+                       style="width: 49px; height: 30px; position: absolute; 
+                       vertical-align: middle; margin-top: 30px; 
+                       margin-left: -69px; border: 0px; font-weight: bold; 
+                       font-style: normal; font-variant: normal; 
+                       font-size: 18px; line-height: normal; font-family: Arial;
+                       text-align: center; color: rgb(60, 141, 188); 
+                       padding: 0px; -webkit-appearance: none;
+                       background: none;">
+            </div>
+            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"Memory Usage (MB) - "+(machine.memory.usagePercent())+ "%"}}</div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-6 text-center" ng-show="machine.machineOnline()">
+            <div style="display: inline; width: 90px; height: 90px;">
+                <canvas width="90" height="90"></canvas>
+                <input id="cpu-usage-knob" type="text" class="knob" value="30" data-width="90" 
+                       data-height="90" data-readonly="true" readonly="readonly"
+                       data-fgcolor="black"  data-min="0" data-max="100"
+                       style="width: 49px; height: 30px; position: absolute; 
+                       vertical-align: middle; margin-top: 30px; 
+                       margin-left: -69px; border: 0px; font-weight: bold; 
+                       font-style: normal; font-variant: normal; 
+                       font-size: 18px; line-height: normal; font-family: Arial;
+                       text-align: center; color: rgb(60, 141, 188); 
+                       padding: 0px; -webkit-appearance: none;
+                       background: none;">
+            </div>
+            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"CPU Utilization (Percent) - "+machine.cpu.usagePercent() + "%"}}</div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-6 text-center" ng-show="machine.machineOnline()">
+            <div style="display: inline; width: 90px; height: 90px;">
+                <canvas width="90" height="90"></canvas>
+                <input id="swap-knob" type="text" class="knob" value="30" data-width="90" 
+                       data-height="90" data-readonly="true" readonly="readonly"
+                       data-fgcolor="black"  data-min="0" data-max="100"
+                       style="width: 49px; height: 30px; position: absolute; 
+                       vertical-align: middle; margin-top: 30px; 
+                       margin-left: -69px; border: 0px; font-weight: bold; 
+                       font-style: normal; font-variant: normal; 
+                       font-size: 18px; line-height: normal; font-family: Arial;
+                       text-align: center; color: rgb(60, 141, 188); 
+                       padding: 0px; -webkit-appearance: none;
+                       background: none;">
+            </div>
+            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"Swap Usage(MB) - "+machine.swap.usagePercent() + "%"}}</div>
+        </div>
     </div>
+    </br>
     <div ng-show="machine.machineOnline()" class="row"> <!-- machine.machineOnline() -->
         <div class="{{machine.chat.expanded?'col-md-12':'col-md-6'}} col-sm-12 col-xs-12">
-            <div class="accordion box box-success" ng-click="machine.chat.showing = !machine.chat.showing">
-                <div class="box-header" style="cursor: move; outline:none;">
+            <div class="accordion box box-success" >
+                <div class="box-header" ng-click="machine.chat.showing = !machine.chat.showing" style="cursor: move; outline:none;">
                     <i class="fa fa-comments-o"></i>
                     <h3 class="box-title">Chat</h3>
                     <div class="box-tools pull-right" data-toggle="tooltip" title="" data-original-title="Status">
@@ -71,38 +122,23 @@
                 </div>
                 <div>
                     <div id="commandWindow" class="slimScrollDiv" style="position: relative; width: auto; height: 250px;">
-                        <div class="box-body chat" style="width: auto; height: 250px;">
-                            <!-- chat item -->
+                        <div id="cmdout" class="box-body chat" style="width: auto; height: 250px;">
+                            <!--chat item 
                             <div class="item">
-                                >I would like to meet you to discuss the latest news about
+                                <span>
+                                    5757868
+                                </span>
+                                > I would like to meet you to discuss the latest news about
                                 the arrival of the new theme. They say it is going to be one the
                                 best themes on the market
-                            </div><!-- /.item -->
-                            <!-- chat item -->
-                            <div class="item">
-                                >I would like to meet you to discuss the latest news about
-                                the arrival of the new theme. They say it is going to be one the
-                                best themes on the market
-                            </div><!-- /.item -->
-                            <!-- chat item -->
-                            <div class="item">
-                                >I would like to meet you to discuss the latest news about
-                                the arrival of the new theme. They say it is going to be one the
-                                best themes on the market
-                            </div><!-- /.item -->
-                            <!-- chat item -->
-                            <div class="item">
-                                >I would like to meet you to discuss the latest news about
-                                the arrival of the new theme. They say it is going to be one the
-                                best themes on the market
-                            </div><!-- /.item -->
+                            </div> /.item -->
                         </div>
                     </div><!-- /.chat -->
                     <div class="box-footer">
                         <div class="input-group">
-                            <input class="form-control" placeholder="Type command...">
+                            <input class="form-control" ng-model="machine.command.cmd" ng-keyup="machine.command.keyPressed($event)" placeholder="Type command...">
                             <div class="input-group-btn">
-                                <button class="btn btn-success"><i class="fa fa-plus"></i></button>
+                                <button ng-click="machine.command.sendCmd()" class="btn btn-success"><i class="fa fa-plus"></i></button>
                             </div>
                         </div>
                     </div>
@@ -112,58 +148,55 @@
         </div>
     </div>
     
+    
+    <div ng-show="machine.machineOnline()" class="row"> <!-- machine.machineOnline() -->
+        <div class="col-md-12 col-sm-12 col-xs-12"><!-- {{machine.netStats.expanded?'col-md-12':'col-md-6'}} -->
+            <div class="accordion box box-info" >
+                <div class="box-header" ng-click="machine.netStats.toggleShow()" style="cursor: move; outline:none;">
+                    <i class="fa fa-bar-chart-o"></i>
+                    <h3 class="box-title">Net Stats</h3>
+                    <div class="box-tools pull-right" data-toggle="tooltip" title="" data-original-title="Status">
+                        <div class="btn-group" data-toggle="btn-toggle">
+                            <button ng-show="machine.netStats.showing" ng-click="machine.netStats.refresh($event)" type="button" class="hide-trigger btn btn-default btn-sm">
+                                <i class="fa fa-refresh text-fuchsia"></i>
+                            </button>
+                            <!--<button ng-click="machine.netStats.expandWindow($event) " type="button" class="hidden-sm hidden-xs hide-trigger btn btn-default btn-sm {{machine.netStats.expanded?'active':''}}">
+                                <i class="fa fa-arrows-h text-blue"></i>
+                            </button>-->
+                            <button type="button" class="hide-trigger btn btn-default btn-sm {{machine.netStats.showing?'active':''}}">
+                                <i class="fa {{machine.netStats.showing?'fa-sort-up text-red':'fa-sort-down text-green'}} "></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div  class="slimScrollDiv text-center" style="position: relative; width: auto; height: 250px;">
+                        <div class="box-body chat" style="width: auto; height: 250px;">
+                            <canvas ng-show="machine.netStats.ports.length<=0" id="spinner" style="width: 50; height: 50; padding: 30px;"></canvas>
+                            <table ng-show="machine.netStats.ports.length>0" class="table text-left">
+                                <tr>
+                                    <th>Port</th> <th>Protocol</th><th>Process</th>
+                                </tr>
+                                <tr ng-repeat="port in machine.netStats.ports">
+                                    <td>{{port.port}}</td>
+                                    <td>{{port.prot}}</td>
+                                    <td>{{port.proc}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div><!-- /.chat -->
+                    <div class="box-footer">
+                        
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    
     <div ng-show="machine.machineOnline()" class="row">
-        <div class="col-md-3 col-sm-6 col-xs-6 text-center">
-            <div style="display: inline; width: 90px; height: 90px;">
-                <canvas width="90" height="90"></canvas>
-                <input id="memory-usage-knob" type="text" class="knob" value="30" data-width="90" 
-                       data-height="90" data-readonly="true" readonly="readonly"
-                       data-fgcolor="black"  data-min="0" data-max="100"
-                       style="width: 49px; height: 30px; position: absolute; 
-                       vertical-align: middle; margin-top: 30px; 
-                       margin-left: -69px; border: 0px; font-weight: bold; 
-                       font-style: normal; font-variant: normal; 
-                       font-size: 18px; line-height: normal; font-family: Arial;
-                       text-align: center; color: rgb(60, 141, 188); 
-                       padding: 0px; -webkit-appearance: none;
-                       background: none;">
-            </div>
-            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"Memory Usage (MB) - "+(machine.memory.usagePercent())+ "%"}}</div>
-        </div>
-        <div class="col-md-3 col-sm-6 col-xs-6 text-center">
-            <div style="display: inline; width: 90px; height: 90px;">
-                <canvas width="90" height="90"></canvas>
-                <input id="cpu-usage-knob" type="text" class="knob" value="30" data-width="90" 
-                       data-height="90" data-readonly="true" readonly="readonly"
-                       data-fgcolor="black"  data-min="0" data-max="100"
-                       style="width: 49px; height: 30px; position: absolute; 
-                       vertical-align: middle; margin-top: 30px; 
-                       margin-left: -69px; border: 0px; font-weight: bold; 
-                       font-style: normal; font-variant: normal; 
-                       font-size: 18px; line-height: normal; font-family: Arial;
-                       text-align: center; color: rgb(60, 141, 188); 
-                       padding: 0px; -webkit-appearance: none;
-                       background: none;">
-            </div>
-            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"CPU Utilization (Percent) - "+machine.cpu.usagePercent() + "%"}}</div>
-        </div>
-        <div class="col-md-3 col-sm-6 col-xs-6 text-center">
-            <div style="display: inline; width: 90px; height: 90px;">
-                <canvas width="90" height="90"></canvas>
-                <input id="swap-knob" type="text" class="knob" value="30" data-width="90" 
-                       data-height="90" data-readonly="true" readonly="readonly"
-                       data-fgcolor="black"  data-min="0" data-max="100"
-                       style="width: 49px; height: 30px; position: absolute; 
-                       vertical-align: middle; margin-top: 30px; 
-                       margin-left: -69px; border: 0px; font-weight: bold; 
-                       font-style: normal; font-variant: normal; 
-                       font-size: 18px; line-height: normal; font-family: Arial;
-                       text-align: center; color: rgb(60, 141, 188); 
-                       padding: 0px; -webkit-appearance: none;
-                       background: none;">
-            </div>
-            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"Swap Usage(MB) - "+machine.swap.usagePercent() + "%"}}</div>
-        </div>
+        
     </div>
     
     <div ng-show="machine.machineOnline()" class="row">
@@ -194,7 +227,7 @@
                         <td>{{process.id}}</td>
                         <td>{{process.name}}</td>
                         <td><span class="badge bg-{{process.cpu>80?'red':process.cpu>60?'yellow':'green'}}">
-                                {{process.cpu+"%"}}
+                                {{machine.round(process.cpu,2)+"%"}}
                         </span></td>
                         <td><span class="badge bg-{{process.memory>80?'red':process.memory>60?'yellow':'green'}}">{{process.memory+"%"}}</span></td>
                         <td><span class="badge bg-blue">{{process.user}}</span></td>
@@ -219,6 +252,34 @@
                 collapsible: true
             });
         });
+    </script>
+    <script>
+        var canvas = document.getElementById('spinner');
+        var context = canvas.getContext('2d');
+        var start = new Date();
+        var lines = 16,  
+            cW = context.canvas.width,
+            cH = context.canvas.height;
+
+        var draw = function() {
+            var rotation = parseInt(((new Date() - start) / 1000) * lines) / lines;
+            context.save();
+            context.clearRect(0, 0, cW, cH);
+            context.translate(cW / 2, cH / 2);
+            context.rotate(Math.PI * 2 * rotation);
+            for (var i = 0; i < lines; i++) {
+
+                context.beginPath();
+                context.rotate(Math.PI * 2 / lines);
+                context.moveTo(cW / 10, 0);
+                context.lineTo(cW / 4, 0);
+                context.lineWidth = cW / 30;
+                context.strokeStyle = "rgba(0, 0, 0," + i / lines + ")";
+                context.stroke();
+            }
+            context.restore();
+        };
+        window.setInterval(draw, 1000 / 30);
     </script>
 </div>
 <!-- /Machine Page -->
