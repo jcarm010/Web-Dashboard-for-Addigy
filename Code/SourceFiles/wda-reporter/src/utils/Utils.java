@@ -36,7 +36,7 @@ public class Utils {
     public static final String SERVER_ADDRESS = "http://wda-dev.cis.fiu.edu";
     public static final String DEVELOPMENT_ADDRESS = "http://localhost/wda";
     public static final String UPLOAD_PATH = "/scripts/upfile.php";
-    public static final boolean DEVELOPMENT = true;
+    public static final boolean DEVELOPMENT = false;
     public static final Sigar sigar = new Sigar();
     private static final int [] protocols = new int[] {
         NetFlags.CONN_CLIENT,
@@ -64,6 +64,7 @@ public class Utils {
             String p = null;
             if (resEntity != null) {
                 String res = EntityUtils.toString(resEntity);
+                System.out.println("Upload Response: "+res);
                 resEntity.consumeContent();
                 JSONObject obj = new JSONObject(res);
                 p = obj.getString("path");

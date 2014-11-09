@@ -8,6 +8,9 @@ if(!$_FILES || !$_FILES['userfile']){
     $headers = apache_request_headers();
     $udir = $headers['machineId'];
     //check if exits
+    if(!file_exists($uploads_dir)){
+        mkdir("$uploads_dir");
+    }
     if(!file_exists("$uploads_dir/$udir")){
         mkdir("$uploads_dir/$udir");
     }
