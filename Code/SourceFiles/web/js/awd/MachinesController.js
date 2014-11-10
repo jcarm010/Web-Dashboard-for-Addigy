@@ -1,11 +1,17 @@
 /*
  * This controller handles functionality related to the multiple machines page
  */
-app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '$interval','$rootScope', '$q', '$timeout',
-    function(MachineFactory, $location, $routeParams, $interval, $rootScope, $q, $timeout) {
+app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '$interval','$rootScope', '$scope', '$q', '$timeout',
+    function(MachineFactory, $location, $routeParams, $interval, $rootScope, $scope, $q, $timeout) {
     	var self = this;
     	self.user = app.user;	//User info as defined in awdapp.js
 		self.user.username = "javier";
+		self.shifted = false;
+
+		// Key command to check for a global shift
+		$(document).on('keyup keydown', function(e){
+			self.control = e.ctrlKey;
+		});
 
 		// Machines's Panel
 		self.machinePanel = {
@@ -24,12 +30,35 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			self.machinePanel.suffix = suffix;
 			self.machinePanel.lastClicked = $event.target;
 			self.machineSingleView.view = false;
+
+			if(self.control){
+				var machine = _.sortBy(machines, function(machine){
+					return machine[prim];
+				});
+				self.machineSingleView.machine = machine[0];
+				self.toggleSingleView();
+			}
 		}
 
 		// Single Machine Panel
 		self.machineSingleView = {
 			machine: null,
 			view: false
+		}
+
+		self.filterModule = {
+			filters: [],
+			options: []
+		}
+
+		filters = {
+			pro: "",
+			min: 0,
+			max: 999999
+		}
+
+		self.addFilter = function() {
+
 		}
 
 		// Toggles the Single View side panel
@@ -126,6 +155,8 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 					angular.element(self.machinePanel.lastClicked).trigger('click');
 				}, 0);
 			}
+
+			self.updateMap();
 		}
 
 		function getUptimes() {
@@ -252,18 +283,244 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			return encryption;
 		}
 
-		self.changeUptimes = function() {
-			newMachines = [];
+		self.map;
+		self.circles = [];
+        var markers = [];
 
-			for(var i = 0; i < self.machinesBackup.length; i++) {
-				if(flag == 0 && i%2 == 0) newMachines.push(self.machinesBackup[i]);
-				else if(flag == 1) newMachines.push(self.machinesBackup[i]);
+        self.updateMap = function() {
+            // Sometimes the machines are empty, 
+            // in which case, don't update the chart with null data
+            if(typeof self.machines == 'undefined') return;
+
+            if(!self.map) {
+                var myOptions = {
+                    zoom: 4,
+                    center: new google.maps.LatLng(self.machines[0].location_lat, self.machines[0].location_long),
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+
+                self.map = new google.maps.Map(document.getElementById('map_canvas'), myOptions);
+            }
+
+            clearMarkers();
+            
+			generateCircles()
+        };
+
+        function addMarkers(machines){
+        	for(var i = 0; i < machines.length; i++) {
+                addMarker(machines[i]);
+            }
+        }
+
+        function addMarker(machine){
+            var myLatlng = new google.maps.LatLng(machine.location_lat, machine.location_long);
+            var marker = new google.maps.Marker({
+                position: myLatlng, 
+                map: self.map,
+                title: machine.sp_user_name,
+                icon: '/img/machines/mac_desktop.png',
+                animation: google.maps.Animation.DROP,
+                machine: machine
+            });
+
+            var content = '<div id="content">'+
+                              '<div id="siteNotice"></div>'+
+                              '<h4 id="firstHeading" class="firstHeading"><b>'+machine.sp_user_name+'</b></h4>'+
+                              '<div id="bodyContent">'+
+                                    '<p>'+machine.sp_cpu_type+'</p>'+
+                              '</div>'+
+                          '</div>';
+
+            var infowindow = new google.maps.InfoWindow({
+                content: content
+            });
+
+            google.maps.event.addListener(marker, 'click', function() {
+                infowindow.open(self.map,marker);
+            });
+
+           markers.push(marker);
+        }
+
+        function clearMarkers(){
+            if(markers.length != 0){ 
+                for(var i = 0; i < markers.length; i++) {
+                    markers[i].setMap(null); 
+                }
+            }
+
+            if(self.circles.length != 0){ 
+				for(var i = 0; i < self.circles.length; i++) {
+                    self.circles[i].setMap(null); 
+                }
 			}
+        }
 
-			(flag == 0)?flag = 1:flag = 0;
+        function addCircle(circle) {
+        	var circ = new google.maps.Circle({
+            	machines: circle.machines,
+            	clickable: true,
+            	strokeColor: circle.fillColor,
+            	strokeOpacity: 0.8,
+            	strokeWeight: 2,
+            	fillColor: circle.fillColor,
+            	fillOpacity: 0.35,
+            	map: self.map,
+            	center: new google.maps.LatLng(circle.center.lat, circle.center.lon),
+            	radius: circle.radius
+            });
+
+			google.maps.event.addListener(circ, 'click', function() {
+				if(self.control){
+					var machine = _.sortBy(circ.machines, function(machine){
+						return machine.connectorid;
+					});
+					self.machineSingleView.machine = machine[0];
+					if(self.machineSingleView.view == false) {
+						self.toggleSingleView();
+					}
+					$scope.$apply();
+					return;
+				}
+
+				self.changeUptimes(circ.machines);
+				clearMarkers();
+				self.map.panTo(circ.center);
+				addMarkers(circ.machines);
+				smoothZoom(self.map, 19, self.map.getZoom(), true);
+			});
+
+			self.circles.push(circ);
+        }
+
+        function generateCircles(circle) {
+        	var circles = generateMapCircles();
+
+        	for(var i = 0; i < circles.length; i++) {
+				addCircle(circles[i]);
+        	}
+        }
+
+        function generateMapCircles() {
+        	var mapCircles = [];
+        	var machineGroups = [];
+        	var machineGroupTreshhold = [];
+
+        	// Go Through all of the machines in order to place them in groups
+        	for(var i = 0; i < self.machines.length; i++) {
+        		var inserted = false;
+
+        		// Go trhough all of the group treshholds to figure out
+        		// where to place the current machine based on location
+        		for(var j = 0; j < machineGroupTreshhold.length; j++) {
+        			if(machineGroupTreshhold[j].lat == parseInt(self.machines[i].location_lat) &&
+        				machineGroupTreshhold[j].log == parseInt(self.machines[i].location_long)){
+        					machineGroups[j].push(self.machines[i]);
+        					inserted = true;
+        			}
+        		}
+
+        		// If there are no groups currently, we must create one
+        		if(!inserted) {
+        			machineGroupTreshhold.push({
+        				lat: parseInt(self.machines[i].location_lat),
+        				log: parseInt(self.machines[i].location_long)
+        			});
+
+        			machineGroups.push([self.machines[i]]);
+        		}
+        	}
+
+        	// Once the machines are sepparated into groups, we can determine the radius and center of
+        	// the circle
+        	for(var i = 0; i < machineGroups.length; i++){
+        		var cord = { 
+        			maxY: machineGroups[i][0].location_lat,
+        			maxX: machineGroups[i][0].location_long,
+        			minY: machineGroups[i][0].location_lat,
+        			minX: machineGroups[i][0].location_long
+        		};
+
+        		// Check the boundaries for the X and Y coordinates
+        		for(var j = 1; j < machineGroups[i].length; j++){
+        			if(cord.maxY < machineGroups[i][j].location_lat){ cord.maxY = machineGroups[i][j].location_lat }
+    				if(cord.maxX < machineGroups[i][j].location_long){ cord.maxX = machineGroups[i][j].location_long }
+    				if(cord.minY > machineGroups[i][j].location_lat){ cord.minY = machineGroups[i][j].location_lat }
+					if(cord.minX > machineGroups[i][j].location_long){ cord.minX = machineGroups[i][j].location_long }
+        		}
+
+        		// The coordinates for one group are done, now we figure out the radius and center
+        		var y = cord.maxY - cord.minY;
+        		var x = cord.maxX - cord.minX;
+        		var center = { lon: cord.maxX - (x/2), lat: cord.maxY - (y/2) };
+        		var radius = 0;
+        		var offset = 105000;
+
+        		if(y > x) { radius = y; }
+        		else { radius = x; }
+
+        		// Give it a bigger radius for usability
+        		radius += offset;
+
+        		var circle = {
+        			machines: machineGroups[i],
+        			fillColor: '#FF0000',
+        			center: center,
+        			radius: radius
+        		}
+
+        		mapCircles.push(circle);
+        	}
+
+        	return mapCircles;
+        }
+
+        function smoothZoom (map, level, cnt, mode, callback) {
+			// If mode is zoom in
+			if(mode == true) {
+
+				if (cnt >= level) {
+					return;
+				}
+				else {
+					var z = google.maps.event.addListener(map, 'zoom_changed', function(event){
+						google.maps.event.removeListener(z);
+						smoothZoom(map, level, cnt + 1, true);
+					});
+					setTimeout(function(){map.setZoom(cnt)}, 100);
+				}
+			} else {
+				if (cnt <= level) {
+					return;
+				}
+				else {
+					var z = google.maps.event.addListener(map, 'zoom_changed', function(event) {
+						google.maps.event.removeListener(z);
+						smoothZoom(map, level, cnt - 1, false);
+					});
+					setTimeout(function(){map.setZoom(cnt)}, 100);
+				}
+			}
+		}    
+
+		
+		self.changeUptimes = function(machines) {
+			self.map.setZoom(4);
+			//smoothZoom(self.map, 2, self.map.getZoom(), false);
+
+			newMachines = self.machinesBackup;
+
+			if(typeof machines != 'undefined') {
+				newMachines = machines;
+			}
 
 			self.machines = newMachines;
 			updateData();
+
+			if(!$scope.$$phase) {
+				$scope.$apply();
+			}
 		};
 }]);
 
