@@ -29,8 +29,12 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
         //an object representing this machine's cpu usage
         this.cpu = {
             used: 0,
+            systemUsed:0,
             usagePercent: function(){
                 return toFixed(this.used, 2);
+            },
+            sysUsagePercent: function(){
+                return toFixed(this.systemUsed, 2);
             }
         };
         
@@ -59,7 +63,8 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
             return precision ? integral + '.' +  padding + fraction : integral;
         }
         function processSysStats(msg){
-            self.cpu.used = msg.SYS_CPU_PERCENT;
+            self.cpu.systemUsed = msg.SYS_CPU_PERCENT;
+            self.cpu.used = msg.CPU;
             
             self.memory.buffersMemory = msg.SYS_MEM_BUFFERS;
             self.memory.freeMemory = msg.SYS_MEM_FREE;
@@ -108,6 +113,14 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 }
             );
             $("#cpu-usage-knob").val(self.cpu.used).trigger('change');
+            
+            $("#sys-cpu-usage-knob").trigger(
+                'configure',{
+                    "max":100,
+                    "fgColor":self.cpu.systemUsed>80?'#e06771':self.cpu.systemUsed>60?'#e0b153':'#3c8dbc'
+                }
+            );
+            $("#sys-cpu-usage-knob").val(self.cpu.systemUsed).trigger('change');
         }
         //a container that holds processes running on the machine
         this.processContainer = new ProcessContainer();
@@ -151,7 +164,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
             }
         }
         function loadNewSShot(msg){
-            var path = "uploads/"+msg.path;
+            var path = "http://wda-dev.cis.fiu.edu/uploads/"+msg.path;
             $('#sshot').attr("src", path);
         }
         //gets the current time of the system

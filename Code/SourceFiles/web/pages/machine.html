@@ -1,10 +1,13 @@
 <!-- Machine Page -->
 <div ng-controller="MachineCtrl as machine" class="container">
-    <div  class="container">
-        <h3>ID: {{machine.machineId+" "}}<span class="badge bg-{{machine.machineOnline()?'green':'red'}}">{{machine.machineOnline()?'Online':'Offline'}}</span></h3>
-        <div class="col-md-3 col-sm-6 col-xs-6 text-center">
+    <h3>ID: {{machine.machineId+" "}}<span class="badge bg-{{machine.machineOnline()?'green':'red'}}">{{machine.machineOnline()?'Online':'Offline'}}</span></h3>
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-6 col-md-offset-5 text-center">
             <image ng-show="machine.machineOnline()" id="sshot" src="" width="150" height="100" style="display: inline; border: 1px solid"/>
         </div>
+    </div>
+    <br>
+    <div  class="row">
         <div class="col-md-3 col-sm-6 col-xs-6 text-center" ng-show="machine.machineOnline()">
             <div style="display: inline; width: 90px; height: 90px;">
                 <canvas width="90" height="90"></canvas>
@@ -37,7 +40,24 @@
                        padding: 0px; -webkit-appearance: none;
                        background: none;">
             </div>
-            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"CPU Utilization (Percent) - "+machine.cpu.usagePercent() + "%"}}</div>
+            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"User CPU (Percent) - "+machine.cpu.usagePercent() + "%"}}</div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-6 text-center" ng-show="machine.machineOnline()">
+            <div style="display: inline; width: 90px; height: 90px;">
+                <canvas width="90" height="90"></canvas>
+                <input id="sys-cpu-usage-knob" type="text" class="knob" value="30" data-width="90" 
+                       data-height="90" data-readonly="true" readonly="readonly"
+                       data-fgcolor="black"  data-min="0" data-max="100"
+                       style="width: 49px; height: 30px; position: absolute; 
+                       vertical-align: middle; margin-top: 30px; 
+                       margin-left: -69px; border: 0px; font-weight: bold; 
+                       font-style: normal; font-variant: normal; 
+                       font-size: 18px; line-height: normal; font-family: Arial;
+                       text-align: center; color: rgb(60, 141, 188); 
+                       padding: 0px; -webkit-appearance: none;
+                       background: none;">
+            </div>
+            <div class="knob-label col-md-offset-4 col-xs-offset-4">{{"System CPU (Percent) - "+machine.cpu.sysUsagePercent() + "%"}}</div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-6 text-center" ng-show="machine.machineOnline()">
             <div style="display: inline; width: 90px; height: 90px;">

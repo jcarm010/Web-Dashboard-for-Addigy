@@ -12,7 +12,6 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import utils.Utils;
