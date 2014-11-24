@@ -40,6 +40,11 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			}
 		}
 
+		self.showSingleMachine = function(machine) {
+			self.machineSingleView.machine = machine;
+			self.machineSingleView.view = true;
+		}
+
 		// Single Machine Panel
 		self.machineSingleView = {
 			machine: null,
@@ -130,6 +135,11 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			no: []
 		}
 
+		// Error Alerts
+		self.errorAlerts = {
+			alerts: []
+		}
+
 		var flag = 0;
 
 		// Gets the machines from the MachineService provider. The call back is needed because the value
@@ -139,8 +149,70 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			self.machines = res.data['@items'];
 			self.machinesBackup = self.machines;
 
+			// check fo any errors in any of the machines
+			detectMachineErrors(self.machines);
+
 			updateData();
 		});
+
+		function detectMachineErrors(machines) {
+			for(var i = 0; i < machines.length; i++) {
+				if(_.has(machines[i], 'error')) {
+					addDOMAlert(machines[i]);
+				}
+			}
+		}
+
+		function addDOMAlert(machine) {
+			// Check if the timestamp is newer that the one stored locally
+			if(_.has(localStorage, machine.connectorid)) {
+				if(new Date(machine.error.time) > new Date(localStorage[machine.connectorid])) {
+					localStorage[machine.connectorid] = machine.error.time;
+					pagerDutyReport(machine.error);
+					showDOMAlert(machine);
+				}
+			} else {
+				localStorage.setItem(machine.connectorid, machine.error.time);
+				pagerDutyReport(machine.error);
+				showDOMAlert(machine);
+			}
+
+			showDOMAlert(machine);
+		}
+
+		function showDOMAlert(machine) {
+			self.errorAlerts.alerts.push({ index: self.errorAlerts.alerts.length, machine: machine });
+		}
+
+		self.removeDOMAlert = function(index) {
+			if(self.errorAlerts.alerts.length == 1) {
+				self.errorAlerts.alerts = [];
+			} else {
+				self.errorAlerts.alerts.splice(index, 1);
+			}
+			console.log(self.errorAlerts.alerts);
+		}
+
+		function pagerDutyReport(error) {
+			var PDJS = new PDJSobj({
+			  subdomain: "wda-dev",
+			  token: "RLT51aJ1fzD9Lbrsr28g",
+			});
+
+			PDJS.trigger({
+			  service_key: "b3fb6d8b4bd544d2a61b3643a48cddf0",
+			  description: error.description,
+			  incident_key: (new Date()).toString(),
+			  details: {
+			    cause: error.cause
+			  },
+			  success: function (json) {
+			    console.log(json);
+			    console.log("Status: " + json.status);
+			    console.log("Incident ID: " + json.incident_key);
+			  }
+			});
+		}
 
 		function updateData() {
 			self.machineUptimes = getUptimes();
@@ -286,6 +358,7 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 		self.map;
 		self.circles = [];
         var markers = [];
+        self.circleSelected = false;
 
         self.updateMap = function() {
             // Sometimes the machines are empty, 
@@ -300,6 +373,17 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
                 };
 
                 self.map = new google.maps.Map(document.getElementById('map_canvas'), myOptions);
+
+                /*
+                google.maps.event.addListener(self.map, 'zoom_changed', function() {
+				    var zoomLevel = self.map.getZoom();
+
+				    if(zoomLevel <= 12 && self.circleSelected) {
+				    	console.log(zoomLevel);
+				    	resetMapView();
+				    }
+				 });
+				*/
             }
 
             clearMarkers();
@@ -315,29 +399,22 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 
         function addMarker(machine){
             var myLatlng = new google.maps.LatLng(machine.location_lat, machine.location_long);
+            var icon = (_.has(machine, 'error'))?'/img/machines/mac_desktop_error.png':'/img/machines/mac_desktop.png';
             var marker = new google.maps.Marker({
                 position: myLatlng, 
                 map: self.map,
                 title: machine.sp_user_name,
-                icon: '/img/machines/mac_desktop.png',
+                icon: icon,
                 animation: google.maps.Animation.DROP,
                 machine: machine
             });
 
-            var content = '<div id="content">'+
-                              '<div id="siteNotice"></div>'+
-                              '<h4 id="firstHeading" class="firstHeading"><b>'+machine.sp_user_name+'</b></h4>'+
-                              '<div id="bodyContent">'+
-                                    '<p>'+machine.sp_cpu_type+'</p>'+
-                              '</div>'+
-                          '</div>';
-
-            var infowindow = new google.maps.InfoWindow({
-                content: content
-            });
-
             google.maps.event.addListener(marker, 'click', function() {
-                infowindow.open(self.map,marker);
+                self.showSingleMachine(marker.machine);
+
+                if(!$scope.$$phase) {
+					$scope.$apply();
+				}
             });
 
            markers.push(marker);
@@ -442,12 +519,21 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
         			minX: machineGroups[i][0].location_long
         		};
 
+        		// Error flag
+        		var error = false;
+
         		// Check the boundaries for the X and Y coordinates
-        		for(var j = 1; j < machineGroups[i].length; j++){
+        		// Check for any errors in the current machines
+        		for(var j = 0; j < machineGroups[i].length; j++){
         			if(cord.maxY < machineGroups[i][j].location_lat){ cord.maxY = machineGroups[i][j].location_lat }
     				if(cord.maxX < machineGroups[i][j].location_long){ cord.maxX = machineGroups[i][j].location_long }
     				if(cord.minY > machineGroups[i][j].location_lat){ cord.minY = machineGroups[i][j].location_lat }
 					if(cord.minX > machineGroups[i][j].location_long){ cord.minX = machineGroups[i][j].location_long }
+
+					// One of the machines in this group has an error
+					if(_.has(machineGroups[i][j], 'error')) {
+						error = true;
+					}
         		}
 
         		// The coordinates for one group are done, now we figure out the radius and center
@@ -456,6 +542,7 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
         		var center = { lon: cord.maxX - (x/2), lat: cord.maxY - (y/2) };
         		var radius = 0;
         		var offset = 105000;
+        		var color = (error)?'#FF0000':'#008000';
 
         		if(y > x) { radius = y; }
         		else { radius = x; }
@@ -465,7 +552,7 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 
         		var circle = {
         			machines: machineGroups[i],
-        			fillColor: '#FF0000',
+        			fillColor: color,
         			center: center,
         			radius: radius
         		}
@@ -502,13 +589,21 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 					setTimeout(function(){map.setZoom(cnt)}, 100);
 				}
 			}
-		}    
+		}
+
+		/*
+		function resetMapView() {
+			console.log("Restarted map");
+			self.circleSelected = false;
+			self.machines = self.machinesBackup;
+			self.map.setZoom(4);
+			updateData();
+		}*/
 
 		
 		self.changeUptimes = function(machines) {
 			self.map.setZoom(4);
 			//smoothZoom(self.map, 2, self.map.getZoom(), false);
-
 			newMachines = self.machinesBackup;
 
 			if(typeof machines != 'undefined') {
