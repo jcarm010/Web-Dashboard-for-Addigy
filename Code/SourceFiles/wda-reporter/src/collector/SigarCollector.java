@@ -62,8 +62,8 @@ public class SigarCollector extends Collector{
         MachineStats stats = new MachineStats();
         try{
             CpuPerc percs = sigar.getCpuPerc();
-            double cpuUsage = percs.getUser()+percs.getSys();
-            stats.addFact(Collector.Fact.SYS_CPU_PERCENT.toString(), cpuUsage*100);
+            stats.addFact(Collector.Fact.SYS_CPU_PERCENT.toString(), percs.getSys()*100);
+            stats.addFact(Collector.Fact.CPU.toString(), percs.getUser()*100);
             Mem mem = sigar.getMem();
             stats.addFact(Collector.Fact.SYS_MEM_FREE.toString(), mem.getActualFree()/KB);
             stats.addFact(Collector.Fact.SYS_MEM_TOTAL.toString(), mem.getTotal()/KB);
