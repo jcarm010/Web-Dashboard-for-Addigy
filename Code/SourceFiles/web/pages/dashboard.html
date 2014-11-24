@@ -156,14 +156,14 @@
 
 		<div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 content-panel">
 			<div class="row">
-				<input type="button" ng-click="machinesctrl.changeUptimes()" value="Filter Machine Test" style="width: 100%;">
+				<input type="button" ng-click="machinesctrl.changeUptimes()" value="Reset Filter" style="width: 100%;">
 			</div>
 
 			<div class="row">
-				<div class="col-md-12 col-lg-12 col-sm-12" ng-controller="MapCtrl">
+				<div class="col-md-12 col-lg-12 col-sm-12">
 					<i class="fa fa-globe" style="margin-right: 10px; font-size: 21px;"></i>
 					<h3  style="display: inline-block;">Machine Locations</h3>
-		        	<map id="map_canvas" style="width: 100%; height: 300px; border: 2px solid #555" ng-model="machinesctrl.machines"></map>
+		        	<div id="map_canvas" style="width: 100%; height: 300px; border: 2px solid #555" ng-model="machinesctrl.machines" filter-machines="machinesctrl.changeUptimes()"></div>
 				</div>
 			</div>
 
