@@ -155,8 +155,15 @@
 		</div>
 
 		<div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 content-panel">
-			<div class="row">
-				<input type="button" ng-click="machinesctrl.changeUptimes()" value="Reset Filter" style="width: 100%;">
+
+			<div class="alerts">
+				<div class="alert alert-danger" role="alert" ng-repeat="alert in machinesctrl.errorAlerts.alerts">
+					<p><b>ERROR</b> - Machine ID <b><a ng-click="machinesctrl.showSingleMachine(alert.machine)" style="cursor: pointer;">{{alert.machine.connectorid}}</a></b> has error <b>"{{alert.machine.error.description}}"</b>, caused by <b>"{{alert.machine.error.cause}}"</b>.</p> <span class="glyphicon glyphicon-remove" style="cursor: pointer;" ng-click="machinesctrl.removeDOMAlert(alert.index)"></span>
+				</div>
+			</div>
+
+			<div class="">
+				<input type="button" class="btn btn-info" ng-click="machinesctrl.changeUptimes()" value="Reset Filter" style="width: 100%;">
 			</div>
 
 			<div class="row">

@@ -99,7 +99,12 @@
          "apple_warranty":"November 25, 2014",
          "location_lat":39.929412,
          "location_long":-74.476168,
-         "wan_ip":"73.46.14.233"
+         "wan_ip":"73.46.14.233",
+         "error": {
+            "time":"2014-11-22T03:52:00",
+            "description": "Server is on Fire!",
+            "cause": "PEBKAC"
+         }
       },
       {  
          "@type":"wdamachinesgenerator.Machine",
@@ -249,7 +254,12 @@
          "apple_warranty":"November 25, 2014",
          "location_lat":25.788331,
          "location_long":-80.212250,
-         "wan_ip":"73.46.14.233"
+         "wan_ip":"73.46.14.233",
+         "error": {
+            "time":"2014-11-23T08:00:00",
+            "description": "Virus Detected!",
+            "cause": "The file 'virus.exe', has been detected to contain a Trojan Horse"
+         }
       },
       {  
          "@type":"wdamachinesgenerator.Machine",
