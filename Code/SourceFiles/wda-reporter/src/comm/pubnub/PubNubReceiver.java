@@ -102,6 +102,7 @@ public class PubNubReceiver extends Callback implements Receiver{
                 case "chatMsg": processChatMessage(obj);break;
                 case "runcmd": processRunCmd(obj);break;
                 case "reqnetstats": reportNetStats();break;
+                case "netSpeedReq": reportNetworkSpeed();break;
             }
         } catch (JSONException | IOException ex) {
             System.err.println("Error in request: "+message);
@@ -157,5 +158,44 @@ public class PubNubReceiver extends Callback implements Receiver{
     @Override
     public void onChatMessageReceived(ChatMessageReceivedHandler handler) {
         messageHandler = handler;
+    }
+    private void reportNetworkSpeed() {
+        new Thread(()->{
+            System.out.println("Running speed test....");
+            double down = 0.0;
+            double up = 0.0;
+            try {
+                final String searchTokenDownload = "Download:";
+                final String searchTokenUpload = "Upload:";
+                Process p = Runtime.getRuntime().exec("speedtest-cli");
+                InputStream in = p.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                String line;
+                while((line=reader.readLine())!=null){
+                    boolean isDown = true;
+                    int tokenSize = searchTokenDownload.length();
+                    int index = line.indexOf(searchTokenDownload);
+                    if(index==-1){
+                        isDown = false;
+                        index = line.indexOf(searchTokenUpload);
+                        tokenSize = searchTokenUpload.length();
+                        if(index == -1) continue;
+                    }
+                    int start = index+tokenSize+1;
+                    String dSpeedStr = line.substring(start,line.indexOf(" ",start));
+                    double speed = Double.parseDouble(dSpeedStr);
+                    if(isDown) down = speed;
+                    else up = speed;
+                }
+                System.out.println("Up: "+ up +" Down: "+down);
+                JSONObject obj = new JSONObject();
+                obj.put("msgType", "netSpeedRep");
+                obj.put("down", down);
+                obj.put("up", up);
+                WDAPubNub.getSharedPubNub().publish(channel, obj , this);
+            } catch (JSONException|IOException ex) {
+                ex.printStackTrace(System.err);
+            }
+        }).start();
     }
 }
