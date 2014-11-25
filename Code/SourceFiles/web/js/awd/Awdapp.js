@@ -1,6 +1,6 @@
 //Initialize the panthertext front end app
-var app = angular.module("awdapp", ['pubnub.angular.service','ngRoute']);
-app.user = new User();
+var Addigy = angular.module("awdapp", ['pubnub.angular.service','ngRoute']);
+Addigy.user = new User();
 function User(){
     var self = this;
     self.username = "";

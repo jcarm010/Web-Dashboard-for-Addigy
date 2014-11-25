@@ -1,11 +1,11 @@
 /*
  * This controller handles functionality related to the single machine page
  */
-app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routeParams', '$timeout','$interval','$rootScope','$scope',
+Addigy.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routeParams', '$timeout','$interval','$rootScope','$scope',
     function(PubNub, DataRequest, $location, $routeParams, $timeout ,$interval,$rootScope,$scope) {
         var timeOut = 10000;
         var self = this;
-        this.user = app.user;//user specific info as defined in awdapp.js
+        this.user = Addigy.user;//user specific info as defined in awdapp.js
         this.machineId = $routeParams.machineId;//the machine id
         this.lastReported = 0;
         //tells whether the machine is online

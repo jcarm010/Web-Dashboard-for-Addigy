@@ -1,3 +1,3 @@
-app.service('MachineFactory', ['DataRequest', function(DataRequest) {
+Addigy.service('MachineFactory', ['DataRequest', function(DataRequest) {
 	return DataRequest.getMachines();
 }]);

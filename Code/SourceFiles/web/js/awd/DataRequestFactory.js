@@ -3,7 +3,7 @@
  * @param string factoryName The name of the factory
  * @param factory The function that defines all types of requests
  */
-app.factory('DataRequest', function($http) {
+Addigy.factory('DataRequest', function($http) {
     var self = this;
     //Setup the format for all http request
     $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
