@@ -33,6 +33,7 @@ public class Reporter {
      * @param args Command line arguments.
      */
     public static void main(String [] args){
+//        args[1] = "100017";
         ChatWindow chat = new ChatWindow();
         //read settings from settings file
         Settings.readSettings(settingsDir);
