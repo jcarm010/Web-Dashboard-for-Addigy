@@ -229,7 +229,12 @@
          "apple_warranty":"November 25, 2014",
          "location_lat":29.404469,
          "location_long":-98.470187,
-         "wan_ip":"73.46.14.233"
+         "wan_ip":"73.46.14.233",
+         "error": {
+            "time":"2014-11-25T03:52:00",
+            "description": "Machine is unreachable!",
+            "cause": "Machine has not been turned on in 220 days!"
+         }
       },
       {  
          "@type":"wdamachinesgenerator.Machine",

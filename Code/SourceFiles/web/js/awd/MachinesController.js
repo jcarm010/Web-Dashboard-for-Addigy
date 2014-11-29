@@ -7,6 +7,12 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
     	self.user = app.user;	//User info as defined in awdapp.js
 		self.user.username = "javier";
 		self.shifted = false;
+		var pdAdmin = "PRSETPR";
+
+		var PDJS = new PDJSobj({
+		  subdomain: "wda-dev",
+		  token: "RLT51aJ1fzD9Lbrsr28g",
+		});
 
 		// Key command to check for a global shift
 		$(document).on('keyup keydown', function(e){
@@ -37,6 +43,19 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 				});
 				self.machineSingleView.machine = machine[0];
 				self.toggleSingleView();
+			}
+		}
+
+		self.showSingleMachineFromId = function(id) {
+			if(!$scope.$$phase) {
+				$scope.$apply();
+			}
+
+			for(var i = 0; i < self.machinesBackup.length; i++) {
+				if(self.machinesBackup[i].connectorid == id){
+					self.showSingleMachine(self.machinesBackup[i]);
+					return;
+				}
 			}
 		}
 
@@ -84,11 +103,11 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 		// Gets the image for the correct machine type
 		self.getMachineImage = function(type){
 			if(type == "MacBook Pro"){
-				return "/img/machines/macbookpro.png";
+				return "img/machines/macbookpro.png";
 			} else if(type == "MacBook Air"){
-				return "/img/machines/macbookair.png";
+				return "img/machines/macbookair.png";
 			} else if(type == "Mac Mini"){
-				return "/img/machines/macmini.png";
+				return "img/machines/macmini.png";
 			}
 
 			return "";
@@ -155,12 +174,44 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			updateData();
 		});
 
+		self.pdUsers = [];
+		self.pdErrors = [];
+
+		function updatePDErrors() {
+			var errors = [];
+
+			PDJS.api_all({
+			  res: "incidents",
+			  data: {
+			  	status: "triggered",
+			    fields: "id,incident_key,status,assigned_to,created_on,trigger_summary_data,escalation_policy,html_url"
+			  },
+			  final_success: function(data) {
+			  	for(var i = 0; i < data.incidents.length; i++) {
+			  		var error = {
+			  			id: data.incidents[i].id,
+						connectorid: data.incidents[i].incident_key,
+						error: data.incidents[i].trigger_summary_data.description,
+						assignedUserId: data.incidents[i].assigned_to[0].object.id,
+						assignedUserName: data.incidents[i].assigned_to[0].object.name,
+						htmlUrl: data.incidents[i].html_url
+			  		}
+			  		errors.push(error);
+			  	}
+			  }
+			});
+
+			return errors;
+		}
+
 		function detectMachineErrors(machines) {
 			for(var i = 0; i < machines.length; i++) {
 				if(_.has(machines[i], 'error')) {
 					addDOMAlert(machines[i]);
 				}
 			}
+
+			updateDataTimer(3000);
 		}
 
 		function addDOMAlert(machine) {
@@ -168,16 +219,14 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			if(_.has(localStorage, machine.connectorid)) {
 				if(new Date(machine.error.time) > new Date(localStorage[machine.connectorid])) {
 					localStorage[machine.connectorid] = machine.error.time;
-					pagerDutyReport(machine.error);
-					showDOMAlert(machine);
+					pagerDutyReport(machine);
+					//showDOMAlert(machine);
 				}
 			} else {
 				localStorage.setItem(machine.connectorid, machine.error.time);
-				pagerDutyReport(machine.error);
-				showDOMAlert(machine);
+				pagerDutyReport(machine);
+				//showDOMAlert(machine);
 			}
-
-			showDOMAlert(machine);
 		}
 
 		function showDOMAlert(machine) {
@@ -190,28 +239,90 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			} else {
 				self.errorAlerts.alerts.splice(index, 1);
 			}
-			console.log(self.errorAlerts.alerts);
 		}
 
-		function pagerDutyReport(error) {
-			var PDJS = new PDJSobj({
-			  subdomain: "wda-dev",
-			  token: "RLT51aJ1fzD9Lbrsr28g",
-			});
-
+		function pagerDutyReport(machine) {
 			PDJS.trigger({
 			  service_key: "b3fb6d8b4bd544d2a61b3643a48cddf0",
-			  description: error.description,
-			  incident_key: (new Date()).toString(),
+			  description: machine.error.description,
+			  incident_key: machine.connectorid,
 			  details: {
-			    cause: error.cause
-			  },
-			  success: function (json) {
-			    console.log(json);
-			    console.log("Status: " + json.status);
-			    console.log("Incident ID: " + json.incident_key);
+			    cause: machine.error.cause
 			  }
 			});
+		}
+
+		function retrievePdUsers() {
+			var users = [];
+
+			PDJS.api({
+			  res: "users",
+			  data: {
+			  	requester_id: pdAdmin,
+			  },
+			  success: function (json) {
+			  	for(var i = 0; i < json.users.length; i++) {
+				  	var user = {
+				  		id: json.users[i].id,
+				  		name: json.users[i].name
+				  	}
+
+				  	users.push(user);
+			  	}
+			  }
+			});
+
+			return users;
+		}
+
+		self.acknowledgeError = function(id) {
+			PDJS.api({
+			  res: "incidents/"+ id +"/acknowledge",
+			  type: "PUT",
+			  data: {
+			  	requester_id: pdAdmin,
+			  },
+			  success: function() {
+			  	alert("Error was successfully acknowledged!");
+			  }
+			});
+
+			updateDataTimer(2000);
+		}
+
+		self.resolveError = function(id) {
+			PDJS.api({
+			  res: "incidents/"+ id +"/resolve",
+			  type: "PUT",
+			  data: {
+			  	requester_id: pdAdmin,
+			  },
+			  success: function() {
+			  	alert("Error was successfully resolved!");
+			  }
+			});
+
+			updateDataTimer(2000);
+		}
+
+		self.reassignError = function(user, id) {
+			PDJS.api({
+			  res: "incidents/"+id+"/reassign",
+			  type: "PUT",
+			  data: {
+			  	requester_id: pdAdmin,
+			  	assigned_to_user: user
+			  },
+			  success: function() {
+			  	alert("Error was successfully reassigned!");
+			  }
+			});
+		}
+
+		function updateDataTimer(time) {
+			setTimeout(function(){
+				updateData();
+			}, time);
 		}
 
 		function updateData() {
@@ -221,6 +332,12 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			self.machineWarranty = getWarranty();
 			self.machineType = getMachineTypes();
 			self.machineEncryption = getEncryptions();
+			self.pdErrors = updatePDErrors();
+			self.pdUsers = retrievePdUsers();
+
+			if(!$scope.$$phase) {
+				$scope.$apply();
+			}
 
 			if(self.machinePanel.lastClicked){
 				$timeout(function() {
@@ -373,17 +490,6 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
                 };
 
                 self.map = new google.maps.Map(document.getElementById('map_canvas'), myOptions);
-
-                /*
-                google.maps.event.addListener(self.map, 'zoom_changed', function() {
-				    var zoomLevel = self.map.getZoom();
-
-				    if(zoomLevel <= 12 && self.circleSelected) {
-				    	console.log(zoomLevel);
-				    	resetMapView();
-				    }
-				 });
-				*/
             }
 
             clearMarkers();
@@ -399,7 +505,7 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 
         function addMarker(machine){
             var myLatlng = new google.maps.LatLng(machine.location_lat, machine.location_long);
-            var icon = (_.has(machine, 'error'))?'/img/machines/mac_desktop_error.png':'/img/machines/mac_desktop.png';
+            var icon = (_.has(machine, 'error'))?'img/machines/mac_desktop_error.png':'img/machines/mac_desktop.png';
             var marker = new google.maps.Marker({
                 position: myLatlng, 
                 map: self.map,
@@ -591,15 +697,6 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			}
 		}
 
-		/*
-		function resetMapView() {
-			console.log("Restarted map");
-			self.circleSelected = false;
-			self.machines = self.machinesBackup;
-			self.map.setZoom(4);
-			updateData();
-		}*/
-
 		
 		self.changeUptimes = function(machines) {
 			self.map.setZoom(4);
@@ -613,9 +710,9 @@ app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '
 			self.machines = newMachines;
 			updateData();
 
-			if(!$scope.$$phase) {
+			/*if(!$scope.$$phase) {
 				$scope.$apply();
-			}
+			}*/
 		};
 }]);
 
