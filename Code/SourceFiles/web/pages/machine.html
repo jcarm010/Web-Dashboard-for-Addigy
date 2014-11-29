@@ -1,8 +1,8 @@
 <!-- Machine Page -->
 <div ng-controller="MachineCtrl as machine" class="container">
     <h3>ID: {{machine.machineId+" "}}<span class="badge bg-{{machine.machineOnline()?'green':'red'}}">{{machine.machineOnline()?'Online':'Offline'}}</span></h3>
-    <div class="row">
-        <div class="col-md-3 col-sm-6 col-xs-6 col-md-offset-5 text-center">
+    <div class="row" ng-show="machine.machineOnline()">
+        <div class="col-md-3 col-sm-6 col-xs-6 text-center col-md-offset-5"> 
             <image ng-show="machine.machineOnline()" id="sshot" src="" width="150" height="100" style="display: inline; border: 1px solid"/>
         </div>
     </div>
@@ -170,7 +170,7 @@
     
     
     <div ng-show="machine.machineOnline()" class="row"> <!-- machine.machineOnline() -->
-        <div class="col-md-12 col-sm-12 col-xs-12"><!-- {{machine.netStats.expanded?'col-md-12':'col-md-6'}} -->
+        <div class="col-md-6 col-sm-12 col-xs-12"><!-- {{machine.netStats.expanded?'col-md-12':'col-md-6'}} -->
             <div class="accordion box box-info" >
                 <div class="box-header" ng-click="machine.netStats.toggleShow()" style="cursor: move; outline:none;">
                     <i class="fa fa-bar-chart-o"></i>
@@ -212,11 +212,77 @@
                 
             </div>
         </div>
-    </div>
-    
-    
-    <div ng-show="machine.machineOnline()" class="row">
-        
+        <div class="col-md-6 col-sm-12 col-xs-12"><!-- {{machine.netStats.expanded?'col-md-12':'col-md-6'}} -->
+            <div class="accordion box box-info" >
+                <div class="box-header" ng-click="machine.speedTest.toggleShow()" style="cursor: move; outline:none;">
+                    <i class="fa fa-tachometer"></i>
+                    <h3 class="box-title">Speed Test</h3>
+                    <div class="box-tools pull-right" data-toggle="tooltip" title="" data-original-title="Status">
+                        <div class="btn-group" data-toggle="btn-toggle">
+                            <button ng-show="machine.speedTest.showing" ng-click="machine.speedTest.refresh($event)" type="button" class="hide-trigger btn btn-default btn-sm">
+                                <i class="fa fa-refresh text-fuchsia"></i>
+                            </button>
+                            <!--<button ng-click="machine.netStats.expandWindow($event) " type="button" class="hidden-sm hidden-xs hide-trigger btn btn-default btn-sm {{machine.netStats.expanded?'active':''}}">
+                                <i class="fa fa-arrows-h text-blue"></i>
+                            </button>-->
+                            <button type="button" class="hide-trigger btn btn-default btn-sm {{machine.netStats.showing?'active':''}}">
+                                <i class="fa {{machine.speedTest.showing?'fa-sort-up text-red':'fa-sort-down text-green'}} "></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div  class="slimScrollDiv text-center" style="position: relative; width: auto; height: 250px;">
+                        <div class="box-body chat" style="width: auto; height: 250px;">
+                            <div class="row">
+                                <!-- small box -->
+                                <div class="col-md-6">
+                                    <div class="small-box bg-{{machine.speedTest.down>19?'aqua':machine.speedTest.down>9?'yellow':'red'}}">
+                                        <div class="inner">
+                                            <h3>
+                                                {{!machine.speedTest.received?'-':machine.speedTest.down}}
+                                            </h3>
+                                            <p>
+                                                MBits/Sec
+                                            </p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="ion {{machine.speedTest.received?'ion-arrow-down-a':'ion-refreshing'}}"></i>
+                                        </div>
+                                        <a href="" class="small-box-footer">
+                                            {{'&nbsp;'}}
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <!-- small box -->
+                                    <div class="small-box bg-{{machine.speedTest.up>9?'aqua':machine.speedTest.up>5?'yellow':'red'}}">
+                                        <div class="inner">
+                                            <h3>
+                                                {{!machine.speedTest.received?'-':machine.speedTest.up}}
+                                            </h3>
+                                            <p>
+                                                MBits/Sec
+                                            </p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="ion {{machine.speedTest.received?'ion-arrow-up-a':'ion-refreshing'}}"></i>
+                                        </div>
+                                        <a href="" class="small-box-footer">
+                                            {{'&nbsp;'}}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div><!-- /.box-body -->
+                        </div>
+                    </div><!-- /.chat -->
+                    <div class="box-footer">
+                        
+                    </div>
+                </div>
+                
+            </div>
+        </div>
     </div>
     
     <div ng-show="machine.machineOnline()" class="row">
@@ -274,32 +340,37 @@
         });
     </script>
     <script>
-        var canvas = document.getElementById('spinner');
-        var context = canvas.getContext('2d');
-        var start = new Date();
-        var lines = 16,  
-            cW = context.canvas.width,
-            cH = context.canvas.height;
+        var spinnerIds = ['spinner'];
+        for(var i = 0 ; i < spinnerIds.length;i++){
+            var spinnerId = spinnerIds[i];
+            var canvas = document.getElementById(spinnerId);
+            if(!canvas)continue;
+            var context = canvas.getContext('2d');
+            var start = new Date();
+            var lines = 16,  
+                cW = context.canvas.width,
+                cH = context.canvas.height;
 
-        var draw = function() {
-            var rotation = parseInt(((new Date() - start) / 1000) * lines) / lines;
-            context.save();
-            context.clearRect(0, 0, cW, cH);
-            context.translate(cW / 2, cH / 2);
-            context.rotate(Math.PI * 2 * rotation);
-            for (var i = 0; i < lines; i++) {
+            var draw = function() {
+                var rotation = parseInt(((new Date() - start) / 1000) * lines) / lines;
+                context.save();
+                context.clearRect(0, 0, cW, cH);
+                context.translate(cW / 2, cH / 2);
+                context.rotate(Math.PI * 2 * rotation);
+                for (var i = 0; i < lines; i++) {
 
-                context.beginPath();
-                context.rotate(Math.PI * 2 / lines);
-                context.moveTo(cW / 10, 0);
-                context.lineTo(cW / 4, 0);
-                context.lineWidth = cW / 30;
-                context.strokeStyle = "rgba(0, 0, 0," + i / lines + ")";
-                context.stroke();
-            }
-            context.restore();
-        };
-        window.setInterval(draw, 1000 / 30);
+                    context.beginPath();
+                    context.rotate(Math.PI * 2 / lines);
+                    context.moveTo(cW / 10, 0);
+                    context.lineTo(cW / 4, 0);
+                    context.lineWidth = cW / 30;
+                    context.strokeStyle = "rgba(0, 0, 0," + i / lines + ")";
+                    context.stroke();
+                }
+                context.restore();
+            };
+            window.setInterval(draw, 1000 / 30);
+        }
     </script>
 </div>
 <!-- /Machine Page -->

@@ -4,7 +4,7 @@
  * @param string filterName The name of the filter
  * @param string filter The function that represents the filter
  */
-app.filter('startFrom', function() {
+Addigy.filter('startFrom', function() {
     return function(input, start) {
         start = +start; //parse to int
         return input.slice(start);
@@ -14,7 +14,7 @@ app.filter('startFrom', function() {
  * Service to scroll to specified element id.
  * @param {string} Element id
  */
-app.service('anchorSmoothScroll', [function(){
+Addigy.service('anchorSmoothScroll', [function(){
     this.scrollTo = function(eID) {
         // This scrolling function 
         // is from http://www.itnewb.com/tutorial/Creating-the-Smooth-Scroll-Effect-with-JavaScript

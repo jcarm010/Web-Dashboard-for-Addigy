@@ -1,8 +1,8 @@
 /*
  * This controller handles functionality in the breadcrums
  */
-app.controller('Breadcrums', ['DataRequest', '$location', function(DataRequest, $location) {
-        this.user = app.user;//user specific info as defined in awdapp.js
+Addigy.controller('Breadcrums', ['DataRequest', '$location', function(DataRequest, $location) {
+        this.user = Addigy.user;//user specific info as defined in awdapp.js
         this.pageTitle = function(){
             var path = $location.path();
             if(path === "/login")

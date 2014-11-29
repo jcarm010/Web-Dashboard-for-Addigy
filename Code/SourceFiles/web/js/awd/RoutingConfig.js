@@ -4,7 +4,7 @@
  * <ng-view> element of index.html
  * @param array Array with the $routeProvider variable from angular
  */
-app.config(['$routeProvider','$locationProvider', function($routeProvider, $locationProvider) {
+Addigy.config(['$routeProvider','$locationProvider', function($routeProvider, $locationProvider) {
 //        $locationProvider.html5Mode(true);
     //The content in the when clause is to be matched to the content of the
     //url after the '#' character ex. http://panthertext.com/#/home

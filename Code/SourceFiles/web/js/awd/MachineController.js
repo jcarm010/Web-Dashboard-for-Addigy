@@ -1,12 +1,11 @@
 /*
  * This controller handles functionality related to the single machine page
  */
-app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routeParams', '$timeout','$interval','$rootScope','$scope',
+Addigy.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routeParams', '$timeout','$interval','$rootScope','$scope',
     function(PubNub, DataRequest, $location, $routeParams, $timeout ,$interval,$rootScope,$scope) {
-        
         var timeOut = 10000;
         var self = this;
-        this.user = app.user;//user specific info as defined in awdapp.js
+        this.user = Addigy.user;//user specific info as defined in awdapp.js
         this.machineId = $routeParams.machineId;//the machine id
         this.lastReported = 0;
         //tells whether the machine is online
@@ -50,6 +49,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 return this.usedSwap*100/this.totalSwap;
             }
         };
+        
         this.round = function(value,precision){ return toFixed(value,precision);};
         function toFixed(value, precision) {
             var precision = precision || 0,
@@ -134,6 +134,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
             PubNub.ngSubscribe({ channel: theChannel+"-stream" });//listen on messages from this channel
             $rootScope.$on(PubNub.ngMsgEv(theChannel+"-stream"), onMessage);//call onMessage when received a message
             reportPresence({machineId:"reporter"});
+            requestSpeedTest();
         });
         //handles the event of receiving a message
         function onMessage (event, payload) {
@@ -161,7 +162,17 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 self.command.cmdOutput(msg);
             }else if(type === 'reportPort'){
                 self.netStats.addPort(msg);
+            }else if(type === 'netSpeedRep'){
+                processSpeedReport(msg);
             }
+        }
+        function processSpeedReport(msg){
+            self.lastReported = getCurrentTime();
+            console.log("Speed Report:");
+            console.log(msg);
+            self.speedTest.received = true;
+            self.speedTest.up = msg.up;
+            self.speedTest.down = msg.down;
         }
         function loadNewSShot(msg){
             var path = "http://wda-dev.cis.fiu.edu/uploads/"+msg.path;
@@ -192,6 +203,12 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                     message: {msgType:"reportPresence",machineId:"web-listener"}
                 });
             }
+        }
+        function requestSpeedTest(){
+            PubNub.ngPublish({//publish a message asking for net speed
+                channel: self.machineId,
+                message: {msgType:"netSpeedReq"}
+            });
         }
         //process a single process that has been received
         function processSingleProcess(msg){
@@ -371,6 +388,7 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
             expanded: false,
             cmd:"",
             cmdOutput: function(msg){
+                self.lastReported = getCurrentTime();
                 var line = $('<div class="item"><span>'+msg.stamp+'</span> > '+msg.line+'</div>');
                 $('#cmdout').append(line);
                 scrollDown("#commandWindow");
@@ -419,9 +437,29 @@ app.controller('MachineCtrl', ['PubNub', 'DataRequest', '$location', '$routePara
                 });
             },
             addPort: function(msg){
+                self.lastReported = getCurrentTime();
                 this.ports.push(msg);
             }
             
+        };
+        this.speedTest = {
+            showing: false,
+            received: false,
+            up: 0,
+            down: 0,
+            refresh: function(evt){
+                console.log("refreshing speed test");
+                if(evt){
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                }
+                this.received = false;
+                requestSpeedTest();
+            },
+            toggleShow: function(){
+                this.showing = !this.showing;
+                if(this.showing && !this.received) this.refresh();
+            }
         };
         
         self.expandWindows = function(evt){

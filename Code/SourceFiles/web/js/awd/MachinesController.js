@@ -1,10 +1,10 @@
 /*
  * This controller handles functionality related to the multiple machines page
  */
-app.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '$interval','$rootScope', '$scope', '$q', '$timeout',
+Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams', '$interval','$rootScope', '$scope', '$q', '$timeout',
     function(MachineFactory, $location, $routeParams, $interval, $rootScope, $scope, $q, $timeout) {
     	var self = this;
-    	self.user = app.user;	//User info as defined in awdapp.js
+    	self.user = Addigy.user;	//User info as defined in awdapp.js
 		self.user.username = "javier";
 		self.shifted = false;
 		var pdAdmin = "PRSETPR";
