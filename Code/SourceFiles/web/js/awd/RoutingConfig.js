@@ -27,7 +27,7 @@ Addigy.config(['$routeProvider','$locationProvider', function($routeProvider, $l
         }).otherwise({
             redirectTo: (function() {
                 return function(){
-                    if(app.user.hasLoggedIn())
+                    if(Addigy.user.hasLoggedIn())
                         return "/dashboard";
                     return "/login";
                 };

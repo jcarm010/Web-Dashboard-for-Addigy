@@ -61,7 +61,7 @@ Addigy.factory('DataRequest', function($http) {
             return self.makeRequest("./resources/pubnub-keys.php", "");//resources/pubnub-keys.php
         },
         getMachines: function() {
-            return self.GET("/resources/dummyMachines.json"); //resources/dummyMachines.json
+            return self.GET("resources/dummyMachines.json"); //resources/dummyMachines.json
         }
     };
 });
