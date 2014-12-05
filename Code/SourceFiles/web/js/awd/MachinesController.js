@@ -7,12 +7,17 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
     	self.user = Addigy.user;	//User info as defined in awdapp.js
 		self.user.username = "javier";
 		self.shifted = false;
-		var pdAdmin = "PRSETPR";
+		var pdAdmin = "PU9DHWS";
 
 		var PDJS = new PDJSobj({
-		  subdomain: "wda-dev",
-		  token: "RLT51aJ1fzD9Lbrsr28g",
+		  subdomain: "addigy-wda",
+		  token: "GVbdXdXxjkbfftGiqDFY"
 		});
+
+		// Polls for user and alert information from PagerDuty every 5 seconds
+		$interval( function() {
+			updateAlerts();
+		}, 5000);
 
 		// Key command to check for a global shift
 		$(document).on('keyup keydown', function(e){
@@ -210,8 +215,6 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
 					addDOMAlert(machines[i]);
 				}
 			}
-
-			updateDataTimer(3000);
 		}
 
 		function addDOMAlert(machine) {
@@ -243,7 +246,7 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
 
 		function pagerDutyReport(machine) {
 			PDJS.trigger({
-			  service_key: "b3fb6d8b4bd544d2a61b3643a48cddf0",
+			  service_key: "7a019b42146a4f07a16fec48f0f62bcb",
 			  description: machine.error.description,
 			  incident_key: machine.connectorid,
 			  details: {
@@ -286,8 +289,6 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
 			  	alert("Error was successfully acknowledged!");
 			  }
 			});
-
-			updateDataTimer(2000);
 		}
 
 		self.resolveError = function(id) {
@@ -301,8 +302,6 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
 			  	alert("Error was successfully resolved!");
 			  }
 			});
-
-			updateDataTimer(2000);
 		}
 
 		self.reassignError = function(user, id) {
@@ -319,10 +318,9 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
 			});
 		}
 
-		function updateDataTimer(time) {
-			setTimeout(function(){
-				updateData();
-			}, time);
+		function updateAlerts() {
+			self.pdErrors = updatePDErrors();
+			self.pdUsers = retrievePdUsers();
 		}
 
 		function updateData() {
@@ -332,8 +330,6 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
 			self.machineWarranty = getWarranty();
 			self.machineType = getMachineTypes();
 			self.machineEncryption = getEncryptions();
-			self.pdErrors = updatePDErrors();
-			self.pdUsers = retrievePdUsers();
 
 			if(!$scope.$$phase) {
 				$scope.$apply();
@@ -563,7 +559,11 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
 					if(self.machineSingleView.view == false) {
 						self.toggleSingleView();
 					}
-					$scope.$apply();
+					
+					if(!$scope.$$phase) {
+						$scope.$apply();
+					}
+
 					return;
 				}
 
@@ -681,7 +681,7 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
 						google.maps.event.removeListener(z);
 						smoothZoom(map, level, cnt + 1, true);
 					});
-					setTimeout(function(){map.setZoom(cnt)}, 100);
+					$timeout(function(){map.setZoom(cnt)}, 100);
 				}
 			} else {
 				if (cnt <= level) {
@@ -692,7 +692,7 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
 						google.maps.event.removeListener(z);
 						smoothZoom(map, level, cnt - 1, false);
 					});
-					setTimeout(function(){map.setZoom(cnt)}, 100);
+					$timeout(function(){map.setZoom(cnt)}, 100);
 				}
 			}
 		}
@@ -709,10 +709,6 @@ Addigy.controller('MachinesCtrl', ['MachineFactory', '$location', '$routeParams'
 
 			self.machines = newMachines;
 			updateData();
-
-			/*if(!$scope.$$phase) {
-				$scope.$apply();
-			}*/
 		};
 }]);
 
