@@ -1,0 +1,255 @@
+[
+    {
+        "code": "APPLEUPDATES",
+        "resourcename": "Apply Apple Updates",
+        "resourcetype": "Configuration Deployment",
+        "icon": "applesoftwareupdate.png",
+        "puppetcode": "'import trash'",
+        "options": [
+            {
+                "optionname": "Secured",
+                "optioncode": "SECURED",
+                "data": [
+                    {
+                        "code": "1",
+                        "value": "Yes"
+                    },
+                    {
+                        "code": "0",
+                        "value": "No"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "CAFFEINE",
+        "resourcename": "Caffeine",
+        "resourcetype": "Software Deployment",
+        "icon": "caffeine.png",
+        "puppetcode": "'import symmantecendpointprotection'",
+        "options": [
+            {
+                "optionname": "Version",
+                "optioncode": "VERSION",
+                "data": [
+                    {
+                        "code": "V.1",
+                        "value": "V.1"
+                    },
+                    {
+                        "code": "V.2",
+                        "value": "V.2"
+                    },
+                    {
+                        "code": "V.3",
+                        "value": "V.3"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "CHROME",
+        "resourcename": "Chrome",
+        "resourcetype": "Software Deployment",
+        "icon": "chrome.png",
+        "puppetcode": "'import chrome' if puppetoptions['VERSION']=='LATEST' else 'import chrome:beta'",
+        "options": [
+            {
+                "optionname": "Version",
+                "optioncode": "VERSION",
+                "data": [
+                    {
+                        "code": "LATEST",
+                        "value": "Latest Version"
+                    },
+                    {
+                        "code": "BETA",
+                        "value": "Beta Version"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "CREATIVECLOUD",
+        "resourcename": "Adobe Creative Cloud",
+        "resourcetype": "Software Deployment",
+        "icon": "adobecreative.png",
+        "puppetcode": "'import creativecloud'",
+        "options": [
+            {
+                "optionname": "Version",
+                "optioncode": "VERSION",
+                "data": [
+                    {
+                        "code": "V.1",
+                        "value": "V.1"
+                    },
+                    {
+                        "code": "V.2",
+                        "value": "V.2"
+                    },
+                    {
+                        "code": "V.3",
+                        "value": "V.3"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "EVERNOTE",
+        "resourcename": "Evernote",
+        "resourcetype": "Software Deployment",
+        "icon": "evernote.png",
+        "puppetcode": "'import evernote'",
+        "options": [
+            {
+                "optionname": "Version",
+                "optioncode": "VERSION",
+                "data": [
+                    {
+                        "code": "V.1",
+                        "value": "V.1"
+                    },
+                    {
+                        "code": "V.2",
+                        "value": "V.2"
+                    },
+                    {
+                        "code": "V.3",
+                        "value": "V.3"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "FIREWALL",
+        "resourcename": "Apple Firewall",
+        "resourcetype": "Configuration Deployment",
+        "icon": "applefirewall.png",
+        "puppetcode": "'import trash'",
+        "options": [
+            {
+                "optionname": "Secured",
+                "optioncode": "SECURED",
+                "data": [
+                    {
+                        "code": "1",
+                        "value": "Yes"
+                    },
+                    {
+                        "code": "0",
+                        "value": "No"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "FITCLIENT",
+        "resourcename": "Fit Client McClatchy",
+        "resourcetype": "Software Deployment",
+        "icon": "fitclient.png",
+        "puppetcode": "'import symmantecendpointprotection'",
+        "options": [
+            {
+                "optionname": "Version",
+                "optioncode": "VERSION",
+                "data": [
+                    {
+                        "code": "V.12.1",
+                        "value": "v.1.0"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "MESSAGE",
+        "resourcename": "Message",
+        "resourcetype": "Configuration Deployment",
+        "icon": "messagebubble.png",
+        "puppetcode": "'import message'",
+        "options": [
+            {
+                "optionname": "Secured",
+                "optioncode": "SECURED",
+                "data": [
+                    {
+                        "code": "1",
+                        "value": "Yes"
+                    },
+                    {
+                        "code": "0",
+                        "value": "No"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "SEP",
+        "resourcename": "Symmantec Endpoint Protection",
+        "resourcetype": "Software Deployment",
+        "icon": "symmantec.png",
+        "puppetcode": "'import symmantecendpointprotection'",
+        "options": [
+            {
+                "optionname": "Version",
+                "optioncode": "VERSION",
+                "data": [
+                    {
+                        "code": "V.12.1",
+                        "value": "v.12.1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "TRASH",
+        "resourcename": "Trash",
+        "resourcetype": "Configuration Deployment",
+        "icon": "trash.png",
+        "puppetcode": "'import trash'",
+        "options": [
+            {
+                "optionname": "Secured",
+                "optioncode": "SECURED",
+                "data": [
+                    {
+                        "code": "1",
+                        "value": "Yes"
+                    },
+                    {
+                        "code": "0",
+                        "value": "No"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "VPN-CISCO",
+        "resourcename": "Cisco VPN Client McClatchy",
+        "resourcetype": "Software Deployment",
+        "icon": "ciscovpn.png",
+        "puppetcode": "'import symmantecendpointprotection'",
+        "options": [
+            {
+                "optionname": "Version",
+                "optioncode": "VERSION",
+                "data": [
+                    {
+                        "code": "V.12.1",
+                        "value": "v.5.1"
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -11,6 +11,8 @@ Addigy.controller('Breadcrums', ['DataRequest', '$location', function(DataReques
                 return "Dashboard";
             else if(path.indexOf("/machine")===0)
                 return "Machine";
+            else if(path.indexOf("/resedit")===0)
+                return "Edit Resources";
         };
         
     }]);

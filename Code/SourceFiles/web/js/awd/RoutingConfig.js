@@ -24,6 +24,11 @@ Addigy.config(['$routeProvider','$locationProvider', function($routeProvider, $l
             templateUrl: function(){
                 return "./pages/machine.html";
             }
+        }).when('/resedit',
+        {
+            templateUrl: function(){
+                return "./pages/resedit.html";
+            }
         }).otherwise({
             redirectTo: (function() {
                 return function(){

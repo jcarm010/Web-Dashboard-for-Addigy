@@ -1,0 +1,52 @@
+<!-- Resource Edit Page -->
+<div ng-controller="ReseditCtrl as resedit" class="container">
+    <div class="col-md-12">
+        <a ng-click="resedit.storeChanges()" class="btn btn-block btn-primary">
+            <i class="fa fa-save"></i> Store Changes
+        </a>
+    </div>
+    <br><br>
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header">
+                <i class="text-yellow fa fa-star"></i>
+                <h3 class="box-title">Resources</h3>
+            </div><!-- /.box-header -->
+            <div class="box-body">
+                <div class="form-group">
+                    <label>Find</label>
+                    <input ng-model="resedit.resourceFilterValue" type="text" class="form-control" placeholder="Resource code...">
+                </div>
+                <div ng-repeat="res in resedit.resources | filter:resourceCodeFilter" >
+                    <a href="" ng-click="resedit.removeResouce(res)">
+                        <span class="text-red fa fa-minus"></span>
+                    </a>
+                    <span><img alt="icon" ng-src="./img/{{res.icon}}" width="25" height="25"/></span>
+                    <span class="">{{res.code.toLowerCase()}}</span>
+                    -
+                    <span class="text-muted">{{res.resourcetype}}</span>
+                </div>
+            </div><!-- /.box-body -->
+        </div><!-- /.box -->
+    </div>
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header">
+                <i class="text-green fa fa-archive"></i>
+                <h3 class="box-title">Available Casks</h3>
+            </div><!-- /.box-header -->
+            <div class="box-body">
+                <div class="form-group">
+                    <label>Find</label>
+                    <input ng-model="resedit.caskFilterValue" type="text" class="form-control" placeholder="Cask name...">
+                </div>
+                <div ng-repeat="cask in resedit.caskNames | filter:caskNameFilter" >
+                    <a href="" ng-click="resedit.addCask(cask)">
+                        <span ng-hide="resedit.resources[cask]" class="text-green fa fa-plus"></span>
+                    </a>
+                    <span class="">{{cask}}</span>
+                </div>
+            </div><!-- /.box-body -->
+        </div><!-- /.box -->
+    </div>
+</div>

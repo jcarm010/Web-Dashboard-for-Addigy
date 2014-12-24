@@ -57,6 +57,18 @@ Addigy.factory('DataRequest', function($http) {
                     return true;//return true and ignore results
                 });
         },
+        storeResources:function(resourcesStr){
+            return self.makeRequest("./scripts/StoreResources.php","res="+resourcesStr);
+        },
+        getCask:function(caskName){
+            return self.makeRequest("./scripts/GetCask.php","caskName="+caskName);
+        },
+        listCasks: function() {
+            return self.makeRequest("./scripts/ListCasks.php", "");
+        },
+        getResources: function() {
+            return self.makeRequest("./resources/resources.json", "");
+        },
         getPubnubKeys: function() {
             return self.makeRequest("./resources/pubnub-keys.php", "");//resources/pubnub-keys.php
         },
